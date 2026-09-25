@@ -8,121 +8,129 @@ public class BenchmarkV4 {
     public static void main(String[] args) {
 
         int[] documentSizes = {
-                5,
                 100,
                 1000,
                 5000,
-                10000
+                10000,
+                50000
         };
 
         String query = "battery";
-
-        System.out.println("====================================");
-        System.out.println("        OKF V4 BENCHMARK");
-        System.out.println("====================================");
-
+        int iterations = 100;
+        System.out.println("              OKF V4 BENCHMARK");
         System.out.println();
-
         System.out.printf(
-                "%-12s %-20s %-20s %-12s%n",
+                "%-10s %-18s %-18s %-18s %-10s%n",
                 "Documents",
+                "V2 Avg (ms)",
                 "Index Build (ms)",
-                "Query Time (ms)",
+                "V3 Avg (ms)",
                 "Results"
         );
 
         System.out.println(
-                "------------------------------------------------------------------"
+                "--------------------------------------------------------------------------"
         );
 
         for (int size : documentSizes) {
+            // 1. Create synthetic documents
+            List<Document> documents = createTestDocuments(size);
 
-            // Create test documents
-            List<Document> documents =
-                    createTestDocuments(size);
+            // 2. Create V2 search engine
+            SearchEngineV2 v2 = new SearchEngineV2(documents);
 
-            // Measure index construction time
+            // 3. Build V3 inverted index
+            InvertedIndex invertedIndex = new InvertedIndex();
+
             long indexStart = System.nanoTime();
-
-            SearchEngine searchEngine =
-                    new SearchEngine(documents);
-
+            invertedIndex.buildIndex(documents);
             long indexEnd = System.nanoTime();
+            double indexBuildTime = (indexEnd - indexStart) / 1_000_000.0;
 
-            double indexTime =
-                    (indexEnd - indexStart)
-                    / 1_000_000.0;
+            // 4. Create V3 search engine
+            SearchEngine v3 = new SearchEngine(documents,invertedIndex);
 
-            // Warm-up query
-            searchEngine.search(query);
+            // 5. Warm up JVM
+            for (int i = 0; i < 10; i++) {
+                v2.search(query);
+                v3.search(query);
+            }
 
-            // Measure query time
-            long queryStart = System.nanoTime();
+            // 6. Benchmark V2
+            long v2Start = System.nanoTime();
+            List<SearchResult> v2Results = null;
+            for (int i = 0; i < iterations; i++) {
+                v2Results = v2.search(query);
+            }
+            long v2End = System.nanoTime();
+            double v2Average = (v2End - v2Start)/ 1_000_000.0/ iterations;
 
-            List<SearchResult> results =
-                    searchEngine.search(query);
+            // 7. Benchmark V3
 
-            long queryEnd = System.nanoTime();
+            long v3Start = System.nanoTime();
+            List<SearchResult> v3Results = null;
+            for (int i = 0; i < iterations; i++) {
+                v3Results = v3.search(query);
+            }
+            long v3End = System.nanoTime();
 
-            double queryTime =
-                    (queryEnd - queryStart)
-                    / 1_000_000.0;
+            double v3Average = (v3End - v3Start)/ 1_000_000.0/ iterations;
 
-            // Display result
+            // 8. Display results
             System.out.printf(
-                    "%-12d %-20.4f %-20.4f %-12d%n",
+                    "%-10d %-18.6f %-18.6f %-18.6f %-10d%n",
                     size,
-                    indexTime,
-                    queryTime,
-                    results.size()
+                    v2Average,
+                    indexBuildTime,
+                    v3Average,
+                    v3Results.size()
             );
         }
+
 
         System.out.println();
         System.out.println("Benchmark completed.");
     }
 
+    // Create synthetic documents
+
     private static List<Document> createTestDocuments(
             int numberOfDocuments) {
 
-        List<Document> documents =
-                new ArrayList<>();
+        List<Document> documents = new ArrayList<>();
 
-        for (int i = 1; i <= numberOfDocuments; i++) {
 
-            String title =
-                    "Test Document " + i;
+        for (int i = 1;i <= numberOfDocuments;i++) {
 
+            String title = "Test Document " + i;
             String content;
-
             /*
-             * Every 10th document contains "battery".
-             * This gives us predictable search results.
+             * Every 10th document contains
+             * the word "battery".
+             *
+             * Therefore:
+             *
+             * 100 documents  -> 10 results
+             * 1000 documents -> 100 results
+             * 5000 documents -> 500 results
+             * etc.
              */
-            if (i % 10 == 0) {
 
+            if (i % 10 == 0) {
                 content =
                         "This document contains information "
                         + "about battery technology, energy "
                         + "storage and electric systems.";
 
             } else {
-
                 content =
                         "This is a test document containing "
                         + "general information about computers "
                         + "and technology.";
             }
 
-           documents.add(
-        new Document(
-                String.valueOf(i),
-                title,
-                content
-        )
-);
+            documents.add(new Document(String.valueOf(i),title,content));
         }
-
         return documents;
     }
 }

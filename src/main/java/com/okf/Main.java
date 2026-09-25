@@ -14,33 +14,22 @@ public class Main {
     // 2. Build inverted index
     InvertedIndex invertedIndex = new InvertedIndex();
     long indexStart = System.nanoTime();
-
     invertedIndex.buildIndex(documents);
-
     long indexEnd = System.nanoTime();
-
     double indexTime = (indexEnd - indexStart) / 1_000_000.0;
 
-    System.out.println(
-        "\nIndex built successfully.");
+    System.out.println("\nIndex built successfully.");
 
-    System.out.println(
-        "Index construction time: "
-            + indexTime
-            + " ms");
+    System.out.println("Index construction time: "+ indexTime+ " ms");
 
     // Test inverted index
     String indexTestWord = "battery";
+    System.out.println("\nDocuments containing: "+ indexTestWord);
 
-    System.out.println(
-        "\nDocuments containing: "
-            + indexTestWord);
-
-    System.out.println(
-        invertedIndex.getDocuments(indexTestWord));
+    System.out.println(invertedIndex.getDocuments(indexTestWord));
 
     // 2. Create search engine
-    SearchEngine searchEngine = new SearchEngine(documents);
+    SearchEngine searchEngine = new SearchEngine(documents,invertedIndex);
 
     // 3. Query
     String query = "battery";
@@ -48,9 +37,7 @@ public class Main {
 
     // 4. Measure retrieval time
     long start = System.nanoTime();
-
     List<SearchResult> results = searchEngine.search(query);
-
     long end = System.nanoTime();
 
     // 5. Display results
@@ -65,8 +52,6 @@ public class Main {
 
     // 6. Performance
     double timeMs = (end - start) / 1_000_000.0;
-
     System.out.println("\nRetrieval time: " + timeMs + " ms");
-    System.out.println("Version v3");
   }
 }

@@ -1,35 +1,88 @@
 package com.okf;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class SearchEngine {
 
-    private List<Document> documents;
-    public SearchEngine(List<Document> documents) {
-        this.documents = documents;
+    private InvertedIndex invertedIndex;
+
+    // Maps document ID -> actual Document
+    private Map<String, Document> documentMap;
+
+    public SearchEngine(
+            List<Document> documents,
+            InvertedIndex invertedIndex) {
+
+        this.invertedIndex = invertedIndex;
+
+        documentMap = new HashMap<>();
+
+        for (Document document : documents) {
+            documentMap.put(
+                    document.getId(),
+                    document
+            );
+        }
     }
 
     public List<SearchResult> search(String query) {
-        List<SearchResult> results = new ArrayList<>();
-        String[] queryTerms = query.toLowerCase().split("\\s+");
-        for (Document document : documents) {
-            String content = document.getContent().toLowerCase();
-            int score = 0;
-            for(String term: queryTerms)
-            {
-                if(content.contains(term))
-                {
-                    score++;
-                }
+
+        // document ID -> score
+        Map<String, Integer> scores = new HashMap<>();
+
+        // Break query into words
+        String[] queryTerms =
+                query.toLowerCase().split("\\s+");
+
+        // Search the inverted index
+        for (String term : queryTerms) {
+
+            if (term.isEmpty()) {
+                continue;
             }
-            if(score>0)
-            {
-                results.add(new SearchResult(document, score));
+
+            // Get documents containing this word
+            Set<String> documentIds =
+                    invertedIndex.getDocuments(term);
+
+            // Increase score for each matching document
+            for (String documentId : documentIds) {
+
+                scores.put(
+                        documentId,
+                        scores.getOrDefault(documentId, 0) + 1
+                );
             }
         }
-        results.sort(Comparator.comparingInt(SearchResult::getScore).reversed());
+
+        // Convert scored document IDs into SearchResults
+        List<SearchResult> results =
+                new ArrayList<>();
+
+        for (Map.Entry<String, Integer> entry
+                : scores.entrySet()) {
+
+            Document document =
+                    documentMap.get(entry.getKey());
+
+            if (document != null) {
+
+                results.add(
+                        new SearchResult(
+                                document,
+                                entry.getValue()
+                        )
+                );
+            }
+        }
+
+        // Highest score first
+        results.sort(
+                Comparator.comparingInt(
+                        SearchResult::getScore
+                ).reversed()
+        );
+
         return results;
     }
 }
