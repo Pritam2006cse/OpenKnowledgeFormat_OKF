@@ -23,7 +23,7 @@ public class Main {
     System.out.println("Index construction time: "+ indexTime+ " ms");
 
     // Test inverted index
-    String indexTestWord = "battery";
+    String indexTestWord = "tcp";
     System.out.println("\nDocuments containing: "+ indexTestWord);
 
     System.out.println(invertedIndex.getDocuments(indexTestWord));
@@ -32,7 +32,7 @@ public class Main {
     SearchEngine searchEngine = new SearchEngine(documents,invertedIndex);
 
     // 3. Query
-    String query = "battery";
+    String query = "TCP reliable communication";
     System.out.println("\nQuery: " + query);
 
     // 4. Measure retrieval time

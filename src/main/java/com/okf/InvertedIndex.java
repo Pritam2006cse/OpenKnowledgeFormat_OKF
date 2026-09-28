@@ -12,30 +12,17 @@ public class InvertedIndex {
 
     
     public void buildIndex(List<Document> documents) {
-
         for (Document document : documents) {
-
-            String content =
-                    document.getContent().toLowerCase();
-
-    
-            String[] words =
-                    content.split("\\W+");
-
+            String content = TextPreprocessor.cleanMarkdown(document.getContent());
+            String[] words = content.split("\\W+");
             for (String word : words) {
-
-            
                 if (word.isEmpty()) {
                     continue;
                 }
-
-            
                 index.putIfAbsent(
                         word,
                         new HashSet<>()
                 );
-
-                
                 index.get(word).add(
                         document.getId()
                 );
@@ -45,24 +32,12 @@ public class InvertedIndex {
 
 
     public Set<String> getDocuments(String word) {
-
-        return index.getOrDefault(
-                word.toLowerCase(),
-                Collections.emptySet()
-        );
+        return index.getOrDefault( word.toLowerCase(), Collections.emptySet());
     }
 
-    
     public void displayIndex() {
-
-        for (Map.Entry<String, Set<String>> entry
-                : index.entrySet()) {
-
-            System.out.println(
-                    entry.getKey()
-                    + " -> "
-                    + entry.getValue()
-            );
+        for (Map.Entry<String, Set<String>> entry: index.entrySet()) {
+            System.out.println(entry.getKey()+ " -> "+ entry.getValue());
         }
     }
 }
