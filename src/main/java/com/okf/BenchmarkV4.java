@@ -47,7 +47,7 @@ public class BenchmarkV4 {
             long indexEnd = System.nanoTime();
             double indexBuildTime = (indexEnd - indexStart) / 1_000_000.0;
 
-            // 4. Create V3 search engine
+            // 4. Creating V3 search engine
             SearchEngine v3 = new SearchEngine(documents,invertedIndex);
 
             // 5. Warm up JVM
