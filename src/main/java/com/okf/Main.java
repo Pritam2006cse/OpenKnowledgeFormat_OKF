@@ -1,6 +1,7 @@
 package com.okf;
 
 import java.util.List;
+import java.util.Scanner;
 
 public class Main {
 
@@ -31,8 +32,10 @@ public class Main {
     // 2. Create search engine
     SearchEngine searchEngine = new SearchEngine(documents,invertedIndex);
 
+    Scanner sc = new Scanner(System.in);
+    System.out.print("\nEnter your query: ");
     // 3. Query
-    String query = "TCP reliable communication";
+    String query = sc.nextLine();
     System.out.println("\nQuery: " + query);
 
     // 4. Measure retrieval time
