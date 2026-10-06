@@ -2,6 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { createPortal } from "react-dom";
 import { AlertTriangle, ArrowRight, FileText, Library, Plus, Search, X } from "lucide-react";
+import { fetchMarkdown } from "@/lib/okf/api";
 import { useOkf } from "@/lib/okf/store";
 import type { KnowledgeItem, SourceDocument, ValidationStatus } from "@/lib/okf/types";
 import { StatusBadge, STATUS_LABEL } from "../StatusBadge";
@@ -98,7 +99,21 @@ export function KnowledgeLibrary() {
                 </div>
                 {d.error && <p className="mt-2 flex items-center gap-1 text-xs text-destructive"><AlertTriangle className="h-3 w-3" /> {d.error}</p>}
                 {d.status !== "processing" && (
-                  <button onClick={() => setMdDoc(d)} className="mt-3 text-xs font-semibold text-primary hover:underline">
+                  <button
+                    onClick={async () => {
+                      try {
+                        const markdown = await fetchMarkdown(d.markdownName);
+
+                        setMdDoc({
+                          ...d,
+                          markdown,
+                        });
+                      } catch (error) {
+                        console.error("Failed to load Markdown:", error);
+                      }
+                    }}
+                    className="mt-3 text-xs font-semibold text-primary hover:underline"
+                  >
                     View Markdown →
                   </button>
                 )}
@@ -174,7 +189,21 @@ export function KnowledgeLibrary() {
           <Field label="Validation"><StatusBadge status={open.status} />{open.issue && <p className="mt-2 text-sm text-muted-foreground">{open.issue}</p>}</Field>
           {open.sourcePage && <Field label="Source page">Page {open.sourcePage}</Field>}
           <button
-            onClick={() => setMdDoc(docById[open.documentId] ?? null)}
+            onClick={async () => {
+              const doc = docById[open.documentId];
+              if (!doc) return;
+              try {
+                const markdown = await fetchMarkdown(doc.markdownName);
+                setOpen(null);
+
+                setMdDoc({
+                  ...doc,
+                  markdown,
+                });
+              } catch (error) {
+                console.error("Failed to load Markdown:", error);
+              }
+            }}
             className="lift mt-2 inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
           >
             <FileText className="h-4 w-4" /> View Markdown

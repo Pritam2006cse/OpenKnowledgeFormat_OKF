@@ -94,3 +94,48 @@ function extractItems(md: string, documentId: string, now: string): KnowledgeIte
   flush();
   return items;
 }
+
+const API_BASE_URL = "http://localhost:8080";
+
+export interface BackendSearchResult {
+  id: string;
+  title: string;
+  score: number;
+  snippet: string;
+}
+
+export async function searchKnowledge(
+  query: string
+): Promise<BackendSearchResult[]> {
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Search failed: ${response.status} ${response.statusText}`
+    );
+  }
+
+  return response.json();
+}
+
+export async function fetchMarkdown(
+  markdownName: string
+): Promise<string> {
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/markdown?name=${encodeURIComponent(markdownName)}`
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load Markdown: ${response.status} ${response.statusText}`
+    );
+  }
+
+  const data = await response.json();
+
+  return data.markdown;
+}

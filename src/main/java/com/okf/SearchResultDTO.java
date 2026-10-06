@@ -5,15 +5,18 @@ public class SearchResultDTO {
     private String id;
     private String title;
     private int score;
+    private String snippet;
 
     public SearchResultDTO(
             String id,
             String title,
-            int score) {
+            int score,
+            String snippet) {
 
         this.id = id;
         this.title = title;
         this.score = score;
+        this.snippet = snippet;
     }
 
     public String getId() {
@@ -26,5 +29,9 @@ public class SearchResultDTO {
 
     public int getScore() {
         return score;
+    }
+
+    public String getSnippet(){
+        return snippet;
     }
 }

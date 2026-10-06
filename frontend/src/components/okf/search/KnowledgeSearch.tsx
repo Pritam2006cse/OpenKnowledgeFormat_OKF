@@ -1,12 +1,13 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { searchKnowledge, type BackendSearchResult } from "@/lib/okf/api";
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, ArrowRight, FileText, Gauge, Search as SearchIcon, X } from "lucide-react";
+import { AlertTriangle, ArrowRight, FileText, Search as SearchIcon, X } from "lucide-react";
 import { useOkf } from "@/lib/okf/store";
 import type { KnowledgeItem, SourceDocument } from "@/lib/okf/types";
 import { StatusBadge } from "../StatusBadge";
 import { Drawer, Field } from "../knowledge/KnowledgeLibrary";
 
-// Client-side inverted index mirroring the Java InvertedIndex (TF-IDF ranking).
+/*// Client-side inverted index mirroring the Java InvertedIndex (TF-IDF ranking).
 // Swap for GET /search when the backend is connected.
 const STOP = new Set("the and for are with this that from was were has have not but you your into its our can".split(" "));
 const tokenize = (t: string) => (t.toLowerCase().match(/[a-z0-9]{2,}/g) ?? []).filter((w) => !STOP.has(w));
@@ -22,20 +23,23 @@ function buildIndex(items: KnowledgeItem[]) {
     }
   }
   return { index, buildMs: performance.now() - t0 };
-}
+}*/
 
 const selectCls = "h-10 rounded-xl border bg-card px-3 text-sm shadow-soft outline-none hover:border-primary/40 focus:ring-2 focus:ring-ring cursor-pointer";
 
-function Highlight({ text, terms }: { text: string; terms: string[] }) {
+/*function Highlight({ text, terms }: { text: string; terms: string[] }) {
   if (!terms.length) return <>{text}</>;
   const re = new RegExp(`(${terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})`, "gi");
   return <>{text.split(re).map((p, i) => (i % 2 ? <mark key={i} className="rounded bg-accent px-0.5 text-accent-foreground">{p}</mark> : p))}</>;
-}
+}*/
 
 export function KnowledgeSearch() {
   const documents = useOkf((s) => s.documents);
   const items = useOkf((s) => s.items);
   const [q, setQ] = useState("");
+  const [results, setResults] = useState<BackendSearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState("");
   const [type, setType] = useState("all");
   const [status, setStatus] = useState("all");
   const [source, setSource] = useState("all");
@@ -44,31 +48,50 @@ export function KnowledgeSearch() {
 
   const docById = useMemo(() => Object.fromEntries(documents.map((d) => [d.id, d])), [documents]);
   const types = useMemo(() => Array.from(new Set(items.map((i) => i.type))), [items]);
-  const { index, buildMs } = useMemo(() => buildIndex(items), [items]);
   const failed = documents.filter((d) => d.status === "invalid");
   const reviews = items.filter((i) => i.status === "review");
+  useEffect(() => {
+  const query = q.trim();
 
-  const { results, terms, queryMs } = useMemo(() => {
-    const terms = tokenize(q);
-    const t0 = performance.now();
-    const scores = new Map<string, number>();
-    const N = items.length || 1;
-    for (const t of terms) {
-      for (const [key, post] of index) {
-        if (!key.startsWith(t)) continue; // prefix match
-        const idf = Math.log(1 + N / post.size);
-        for (const [id, tf] of post) scores.set(id, (scores.get(id) ?? 0) + tf * idf * (key === t ? 1 : 0.6));
-      }
+  if (!query) {
+    setResults([]);
+    setSearchError("");
+    return;
+  }
+
+  const timer = setTimeout(async () => {
+
+    try {
+      setSearching(true);
+      setSearchError("");
+
+      const data = await searchKnowledge(query);
+
+      setResults(data);
+
+    } catch (error) {
+
+      console.error("Search error:", error);
+
+      setSearchError(
+        error instanceof Error
+          ? error.message
+          : "Search failed"
+      );
+
+      setResults([]);
+
+    } finally {
+      setSearching(false);
     }
-    const byId = new Map(items.map((i) => [i.id, i]));
-    const results = [...scores]
-      .map(([id, score]) => ({ item: byId.get(id)!, score }))
-      .filter(({ item }) => (type === "all" || item.type === type) && (status === "all" || item.status === status) && (source === "all" || item.documentId === source))
-      .sort((a, b) => b.score - a.score);
-    return { results, terms, queryMs: performance.now() - t0 };
-  }, [q, index, items, type, status, source]);
 
-  const max = results[0]?.score || 1;
+  }, 250);
+
+  return () => clearTimeout(timer);
+
+}, [q]);
+
+  /*const max = results[0]?.score || 1;
   const metrics: [string, ReactNode][] = [
     ["Indexed terms", index.size.toLocaleString()],
     ["Knowledge items", items.length],
@@ -76,7 +99,7 @@ export function KnowledgeSearch() {
     ["Query latency", q ? `${queryMs.toFixed(2)} ms` : "—"],
     ["Results", q ? results.length : "—"],
     ["Coverage", items.length ? `${Math.round(((items.length - reviews.length) / items.length) * 100)}% valid` : "—"],
-  ];
+  ];*/
 
   return (
     <div className="space-y-8">
@@ -97,17 +120,7 @@ export function KnowledgeSearch() {
         {q && <button onClick={() => setQ("")} aria-label="Clear" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 hover:bg-muted"><X className="h-4 w-4" /></button>}
       </label>
 
-      <section className="rounded-2xl border bg-card p-4 shadow-soft">
-        <h2 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground"><Gauge className="h-4 w-4" /> Performance</h2>
-        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {metrics.map(([k, v]) => (
-            <div key={k} className="rounded-xl bg-muted/60 p-3">
-              <dt className="text-[11px] uppercase tracking-widest text-muted-foreground">{k}</dt>
-              <dd className="mt-1 font-mono text-lg font-semibold">{v}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
+      
 
       {(failed.length > 0 || reviews.length > 0) && (
         <section className="rounded-2xl border border-warning/40 bg-warning-soft p-4">
@@ -149,39 +162,115 @@ export function KnowledgeSearch() {
           </div>
 
           {!q ? (
-            <p className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">Type a keyword to search {items.length} knowledge items.</p>
-          ) : results.length === 0 ? (
-            <p className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">No results for “{q}”.</p>
-          ) : (
+
+  <p className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">
+    Type a keyword to search {items.length} knowledge items.
+  </p>
+
+) : searching ? (
+
+  <p className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">
+    Searching OKF...
+  </p>
+
+) : searchError ? (
+
+  <p className="rounded-2xl border border-destructive/30 bg-card p-8 text-center text-sm text-destructive">
+    {searchError}
+  </p>
+
+) : results.length === 0 ? (
+
+  <p className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">
+    No results for “{q}”.
+  </p>
+
+) : (
             <ul className="space-y-3">
-              {results.map(({ item: i, score }, n) => {
-                const d = docById[i.documentId];
-                return (
-                  <li key={i.id} className="lift animate-fade-up rounded-2xl border bg-card p-5 shadow-soft" style={{ animationDelay: `${Math.min(n, 8) * 50}ms` }}>
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-display text-lg font-semibold"><Highlight text={i.title} terms={terms} /></h3>
-                      <span className="shrink-0 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">{i.type}</span>
-                    </div>
-                    <p className="mt-2 line-clamp-3 text-sm text-muted-foreground"><Highlight text={i.description} terms={terms} /></p>
-                    <p className="mt-3 flex flex-wrap items-center gap-1.5 font-mono text-xs text-muted-foreground">
-                      {d?.originalName}{i.sourcePage ? ` (p. ${i.sourcePage})` : ""} <ArrowRight className="h-3 w-3" /> {d?.markdownName} <ArrowRight className="h-3 w-3" /> {i.type}
-                    </p>
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <StatusBadge status={i.status} />
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <div className="h-1.5 w-20 overflow-hidden rounded-full bg-muted"><div className="h-full bg-primary" style={{ width: `${(score / max) * 100}%` }} /></div>
-                          {score.toFixed(2)}
+
+              {results.map((result, n) => {
+                  const d = documents.find(
+                    (doc) =>
+                      doc.id === result.id ||
+                      doc.markdownName === result.id ||
+                      doc.originalName === result.id
+                  );
+
+                  const item = d
+                    ? items.find((i) => i.documentId === d.id)
+                    : undefined;
+
+                  return (
+                    <li
+                      key={result.id}
+                      className="lift animate-fade-up rounded-2xl border bg-card p-5 shadow-soft"
+                      style={{
+                        animationDelay: `${Math.min(n, 8) * 50}ms`,
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <h3 className="font-display text-lg font-semibold">
+                          {item?.title ?? result.title}
+                        </h3>
+
+                        {item?.type && (
+                          <span className="shrink-0 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+                            {item.type}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
+                        {result.snippet}
+                      </p>
+
+                      <p className="mt-3 flex flex-wrap items-center gap-1.5 font-mono text-xs text-muted-foreground">
+                        {d?.originalName ?? result.id}
+
+                        {item?.sourcePage
+                          ? ` (p. ${item.sourcePage})`
+                          : ""}
+
+                        <ArrowRight className="h-3 w-3" />
+
+                        {d?.markdownName ?? result.id}
+                      </p>
+
+                      <div className="mt-4 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          {item?.status && (
+                            <StatusBadge status={item.status} />
+                          )}
+
+                          <span className="font-mono text-xs text-muted-foreground">
+                            Score: {result.score}
+                          </span>
+                        </div>
+
+                        <div className="flex gap-2">
+                          {item && (
+                            <button
+                              onClick={() => setOpen(item)}
+                              className="rounded-lg border px-3 py-1.5 text-xs font-semibold hover:bg-accent"
+                            >
+                              View Knowledge
+                            </button>
+                          )}
+
+                          {d && (
+                            <button
+                              onClick={() => setMdDoc(d)}
+                              className="rounded-lg border px-3 py-1.5 text-xs font-semibold hover:bg-accent"
+                            >
+                              Preview Source
+                            </button>
+                          )}
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        <button onClick={() => setOpen(i)} className="rounded-lg border px-3 py-1.5 text-xs font-semibold hover:bg-accent">View Knowledge</button>
-                        <button onClick={() => d && setMdDoc(d)} className="rounded-lg border px-3 py-1.5 text-xs font-semibold hover:bg-accent">Preview Source</button>
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
+                    </li>
+                  );
+                })}
+
             </ul>
           )}
         </section>
@@ -202,7 +291,9 @@ export function KnowledgeSearch() {
       {mdDoc && (
         <Drawer title={mdDoc.originalName} onClose={() => setMdDoc(null)} wide>
           <p className="text-sm text-muted-foreground">Converted to <span className="font-mono">{mdDoc.markdownName}</span></p>
-          <pre className="whitespace-pre-wrap break-words rounded-2xl border bg-muted p-5 font-mono text-[13px] leading-relaxed"><Highlight text={mdDoc.markdown} terms={terms} /></pre>
+          <pre className="whitespace-pre-wrap break-words rounded-2xl border bg-muted p-5 font-mono text-[13px] leading-relaxed">
+            {mdDoc.markdown}
+          </pre>
         </Drawer>
       )}
     </div>

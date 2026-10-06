@@ -12,7 +12,11 @@ import java.nio.file.Path;
 @RequestMapping("/api")
 @CrossOrigin(origins = "http://localhost:8081")
 public class ConvertController {
+         private final SearchService searchService;
 
+        public ConvertController(SearchService searchService) {
+                this.searchService = searchService;
+        }
     @PostMapping("/convert")
     public ResponseEntity<?> convertPdf(
             @RequestParam("file") MultipartFile file) {
@@ -94,17 +98,21 @@ public class ConvertController {
             }
 
             String markdown =
-                    Files.readString(
-                            markdownPath,
-                            StandardCharsets.UTF_8
-                    );
+        Files.readString(
+                markdownPath,
+                StandardCharsets.UTF_8
+        );
 
-            return ResponseEntity.ok(
-                    new ConvertResponse(
-                            markdownPath.getFileName().toString(),
-                            markdown
-                    )
-            );
+// Reload the OKF search index so the new
+// Markdown document becomes searchable.
+searchService.reloadIndex();
+
+return ResponseEntity.ok(
+        new ConvertResponse(
+                markdownPath.getFileName().toString(),
+                markdown
+        )
+);
 
         } catch (Exception e) {
 
