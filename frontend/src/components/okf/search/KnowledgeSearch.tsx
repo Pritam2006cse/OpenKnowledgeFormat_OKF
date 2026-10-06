@@ -91,6 +91,8 @@ export function KnowledgeSearch() {
 
 }, [q]);
 
+  const max = results[0]?.score || 1;
+
   /*const max = results[0]?.score || 1;
   const metrics: [string, ReactNode][] = [
     ["Indexed terms", index.size.toLocaleString()],
@@ -203,79 +205,63 @@ export function KnowledgeSearch() {
                   return (
                     <li
                       key={result.id}
-                      className="lift animate-fade-up rounded-2xl border bg-card p-5 shadow-soft"
-                      style={{
-                        animationDelay: `${Math.min(n, 8) * 50}ms`,
-                      }}
+                      className="okf-search-card animate-fade-up"
+                      data-status={item?.status}
+                      style={{ animationDelay: `${Math.min(n, 8) * 50}ms` }}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <h3 className="font-display text-lg font-semibold">
-                          {item?.title ?? result.title}
-                        </h3>
-
-                        {item?.type && (
-                          <span className="shrink-0 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
-                            {item.type}
-                          </span>
-                        )}
+                      <div className="okf-search-main">
+                        <span className="okf-rank">#{n + 1}</span>
+                        <div className="flex items-start justify-between gap-3">
+                          <h3 className="okf-search-title">{item?.title ?? result.title}</h3>
+                          {item?.type && <span className="okf-pill">{item.type}</span>}
+                        </div>
+                        <p className="okf-search-snippet">{result.snippet}</p>
                       </div>
 
-                      <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
-                        {result.snippet}
-                      </p>
+                      <div className="okf-search-footer">
+                        <p className="okf-path">
+                          <FileText className="h-3 w-3 shrink-0" />
+                          <span>{d?.originalName ?? result.id}{item?.sourcePage ? ` (p. ${item.sourcePage})` : ""}</span>
+                          <ArrowRight className="h-3 w-3 shrink-0" />
+                          <span>{d?.markdownName ?? result.id}</span>
+                        </p>
 
-                      <p className="mt-3 flex flex-wrap items-center gap-1.5 font-mono text-xs text-muted-foreground">
-                        {d?.originalName ?? result.id}
-
-                        {item?.sourcePage
-                          ? ` (p. ${item.sourcePage})`
-                          : ""}
-
-                        <ArrowRight className="h-3 w-3" />
-
-                        {d?.markdownName ?? result.id}
-                      </p>
-
-                      <div className="mt-4 flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          {item?.status && (
-                            <StatusBadge status={item.status} />
-                          )}
-
-                          <span className="font-mono text-xs text-muted-foreground">
-                            Score: {result.score}
-                          </span>
+                        <div className="okf-meter">
+                          <div className="okf-meter-track">
+                            <div className="okf-meter-fill" style={{ width: `${(result.score / max) * 100}%` }} />
+                          </div>
+                          Score {result.score}
                         </div>
 
-                        <div className="flex gap-2">
-                          {item && (
-                            <button
-                              onClick={() => setOpen(item)}
-                              className="rounded-lg border px-3 py-1.5 text-xs font-semibold hover:bg-accent"
-                            >
-                              View Knowledge
-                            </button>
-                          )}
+                        <div className="flex items-center justify-between gap-3">
+                          {item?.status ? <StatusBadge status={item.status} /> : <span />}
 
-                          {d && (
-                            <button
-                              onClick={async () => {
-                                try {
-                                  const markdown = await fetchMarkdown(d.markdownName);
+                          <div className="flex gap-2">
+                            {item && (
+                              <button
+                                onClick={() => setOpen(item)}
+                                className="okf-btn"
+                              >
+                                View Knowledge
+                              </button>
+                            )}
 
-                                  setMdDoc({
-                                    ...d,
-                                    markdown,
-                                  });
-                                } catch (error) {
-                                  console.error("Failed to load Markdown:", error);
-                                }
-                              }}
-                              className="rounded-lg border px-3 py-1.5 text-xs font-semibold hover:bg-accent"
-                            >
-                              Preview Source
-                            </button>
-                          )}
+                            {d && (
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const markdown = await fetchMarkdown(d.markdownName);
+                                    setMdDoc({ ...d, markdown });
+                                  } catch (error) {
+                                    console.error("Failed to load Markdown:", error);
+                                  }
+                                }}
+                                className="okf-btn okf-btn-solid"
+                              >
+                                Preview Source
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </li>

@@ -32,7 +32,7 @@ export async function convertFile(file: File, onProgress: (p: number) => void): 
     const text = await file.text();
     markdown = ext === "md" ? text : `# ${base.replace(/[_-]+/g, " ")}\n\n${text}`;
   } else {
-    markdown = `# ${base.replace(/[_-]+/g, " ")}\n\n## Overview\n\nContent extracted from ${file.name}. The real backend (PyMuPDF) will provide the full text here.\n\n## Key Points\n\nSection-level knowledge will be structured from headings in this document.\n`;
+    markdown = `# ${base.replace(/[_-]+/g, " ")}\n\n## Overview\n\nContent extracted from ${file.name}.\n\n## Key Points\n\nSection-level knowledge will be structured from headings in this document.\n`;
   }
   return { markdownName: `${base}.md`, markdown };
 }
@@ -75,7 +75,7 @@ function extractItems(md: string, documentId: string, now: string): KnowledgeIte
       id: uid(),
       documentId,
       title: current.title,
-      type: current.level === 1 ? "Topic" : /\d/.test(description.slice(0, 60)) ? "Metric" : (TYPES[1 + (idx % 4)] ?? "Concept"),
+      type: "Knowledge",
       description: description || "No content found under this heading.",
       status: missing ? "review" : "valid",
       issue: missing ? "Heading has little or no supporting content." : undefined,

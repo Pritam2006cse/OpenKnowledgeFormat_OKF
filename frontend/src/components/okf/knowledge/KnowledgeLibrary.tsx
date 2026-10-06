@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { createPortal } from "react-dom";
-import { AlertTriangle, ArrowRight, FileText, Library, Plus, Search, X } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Library, Plus, Search, X } from "lucide-react";
 import { fetchMarkdown } from "@/lib/okf/api";
 import { useOkf } from "@/lib/okf/store";
 import type { KnowledgeItem, SourceDocument, ValidationStatus } from "@/lib/okf/types";
@@ -65,64 +65,25 @@ export function KnowledgeLibrary() {
     <div className="space-y-8">
       {header}
 
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {/* STATS */}
+      <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
-          ["Documents", documents.length, ""],
-          ["Knowledge Items", items.length, ""],
-          ["Valid", count("valid"), "✓"],
-          ["Needs Review", count("review"), "⚠"],
-        ].map(([k, v, icon]) => (
-          <div key={k} className="rounded-2xl border bg-card p-4 shadow-soft">
-            <dt className="text-xs uppercase tracking-widest text-muted-foreground">{k}</dt>
-            <dd className="mt-1 font-display text-2xl font-semibold">{v} <span className="text-base text-primary">{icon}</span></dd>
+          { k: "Documents", v: documents.length, Icon: FileText },
+          { k: "Knowledge Items", v: items.length, Icon: Library },
+          { k: "Valid", v: count("valid"), Icon: CheckCircle2 },
+          { k: "Needs Review", v: count("review"), Icon: AlertTriangle },
+        ].map(({ k, v, Icon }) => (
+          <div key={k} className="okf-stat-card">
+            <div className="okf-icon-chip"><Icon className="h-5 w-5" /></div>
+            <div>
+              <dt className="okf-stat-label">{k}</dt>
+              <dd className="okf-stat-value">{v}</dd>
+            </div>
           </div>
         ))}
       </dl>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">Sources</h2>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {documents.map((d) => {
-            const n = items.filter((i) => i.documentId === d.id).length;
-            return (
-              <li key={d.id} className="lift rounded-2xl border bg-card p-4 shadow-soft">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="truncate font-medium">{d.originalName}</p>
-                  <StatusBadge status={d.status} />
-                </div>
-                <div className="mt-2 space-y-1 font-mono text-xs text-muted-foreground">
-                  <p className="flex items-center gap-1.5"><ArrowRight className="h-3 w-3" /> {d.markdownName}</p>
-                  <p className="flex items-center gap-1.5">
-                    <ArrowRight className="h-3 w-3" />
-                    {d.status === "processing" ? "Processing knowledge…" : d.status === "invalid" ? "Processing failed" : `${n} knowledge items`}
-                  </p>
-                </div>
-                {d.error && <p className="mt-2 flex items-center gap-1 text-xs text-destructive"><AlertTriangle className="h-3 w-3" /> {d.error}</p>}
-                {d.status !== "processing" && (
-                  <button
-                    onClick={async () => {
-                      try {
-                        const markdown = await fetchMarkdown(d.markdownName);
-
-                        setMdDoc({
-                          ...d,
-                          markdown,
-                        });
-                      } catch (error) {
-                        console.error("Failed to load Markdown:", error);
-                      }
-                    }}
-                    className="mt-3 text-xs font-semibold text-primary hover:underline"
-                  >
-                    View Markdown →
-                  </button>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
-
+      {/* KNOWLEDGE */}
       <section className="space-y-4">
         <div className="flex flex-col gap-3 lg:flex-row">
           <label className="relative flex-1">
@@ -153,30 +114,73 @@ export function KnowledgeLibrary() {
         {filtered.length === 0 ? (
           <p className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">No knowledge matches these filters.</p>
         ) : (
-          <ul className="grid gap-3 md:grid-cols-2">
-            {filtered.map((i) => {
-              const d = docById[i.documentId];
-              return (
-                <li key={i.id} className="lift group flex flex-col rounded-2xl border bg-card p-5 shadow-soft hover:border-primary/40">
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="font-display text-lg font-semibold leading-tight">{i.title}</h3>
-                    <span className="shrink-0 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">{i.type}</span>
+          <div className="space-y-4">
+            {documents
+              .map((d) => ({
+                d,
+                rows: filtered.filter((i) => i.documentId === d.id),
+                all: items.filter((i) => i.documentId === d.id),
+              }))
+              .filter(({ rows }) => rows.length > 0)
+              .map(({ d, rows, all }) => {
+                const preview = all.find((i) => i.status === "valid" && i.description)?.description;
+                const valid = all.filter((i) => i.status === "valid").length;
+                const review = all.filter((i) => i.status === "review").length;
+                return (
+                <div key={d.id} className="okf-group">
+                  <div className="okf-group-head">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="okf-icon-chip okf-icon-chip-sm"><FileText className="h-4 w-4" /></div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold">{d.originalName}</p>
+                        <p className="truncate font-mono text-[11px] text-muted-foreground">{d.markdownName}</p>
+                      </div>
+                    </div>
+                    <div className="shrink-0 whitespace-nowrap"><StatusBadge status={d.status} /></div>
                   </div>
-                  <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{i.description}</p>
-                  <div className="mt-3 space-y-0.5 text-xs text-muted-foreground">
-                    <p>Source: <span className="text-foreground">{d?.originalName}</span></p>
-                    <p>Markdown: <span className="font-mono text-foreground">{d?.markdownName}</span></p>
+                  <div className="okf-doc-body">
+                    <div className="okf-doc-stats">
+                      <span className="okf-pill">{all.length} {all.length === 1 ? "section" : "sections"}</span>
+                      <span className="okf-pill">{valid} valid</span>
+                      {review > 0 && <span className="okf-pill">{review} need review</span>}
+                    </div>
+
+                    {preview && <p className="okf-doc-preview">{preview}</p>}
+
+                    <p className="okf-doc-label">Sections</p>
+                    <div className="okf-chips">
+                      {rows.map((i) => (
+                        <button key={i.id} onClick={() => setOpen(i)} className="okf-chip" data-status={i.status}>
+                          {i.title}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                  <div className="mt-4 flex items-center justify-between">
-                    <StatusBadge status={i.status} />
-                    <button onClick={() => setOpen(i)} className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all hover:-translate-y-px hover:bg-accent">
-                      View <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-                    </button>
+
+                  <div className="okf-doc-foot">
+                    <span className="text-xs text-muted-foreground">
+                      {d.error ? d.error : "Click a section to see its details"}
+                    </span>
+                    {d.status !== "processing" && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            const markdown = await fetchMarkdown(d.markdownName);
+                            setMdDoc({ ...d, markdown });
+                          } catch (error) {
+                            console.error("Failed to load Markdown:", error);
+                          }
+                        }}
+                        className="okf-btn okf-btn-solid"
+                      >
+                        View Markdown <ArrowRight className="h-3 w-3" />
+                      </button>
+                    )}
                   </div>
-                </li>
-              );
-            })}
-          </ul>
+                </div>
+                );
+              })}
+          </div>
         )}
       </section>
 
@@ -195,11 +199,7 @@ export function KnowledgeLibrary() {
               try {
                 const markdown = await fetchMarkdown(doc.markdownName);
                 setOpen(null);
-
-                setMdDoc({
-                  ...doc,
-                  markdown,
-                });
+                setMdDoc({ ...doc, markdown });
               } catch (error) {
                 console.error("Failed to load Markdown:", error);
               }
