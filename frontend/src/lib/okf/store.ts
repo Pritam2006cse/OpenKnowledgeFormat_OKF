@@ -31,7 +31,7 @@ export function useOkf<T>(sel: (s: State) => T): T {
 
 async function ingest(q: QueuedFile) {
   try {
-    patchFile(q.id, { stage: "uploading", progress: 0, error: undefined });
+    patchFile(q.id, { stage: "uploading", progress: 0, error: "" });
     await uploadFile(q.file, (progress) => patchFile(q.id, { progress }));
   } catch (e) {
     patchFile(q.id, { stage: "upload_failed", error: (e as Error).message });

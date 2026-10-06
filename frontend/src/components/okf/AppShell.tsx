@@ -29,7 +29,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   return (
-    <div className="min-h-screen text-foreground font-sans">
+    <div className="min-h-screen bg-background text-foreground font-sans">
       {intro && (
         <IntroLoader
           onDone={() => {
@@ -80,7 +80,7 @@ function PageBackdrop({ path }: { path: string }) {
         {[[20, 30], [50, 15], [80, 35], [35, 65], [70, 75], [50, 45]].map(([x, y], i, a) => (
           <g key={i}>
             <circle cx={x} cy={y} r="2.5" fill="currentColor" />
-            <line x1={x} y1={y} x2={a[5][0]} y2={a[5][1]} stroke="currentColor" strokeWidth=".6" />
+            <line x1={x} y1={y} x2={a[5]![0]} y2={a[5]![1]} stroke="currentColor" strokeWidth=".6" />
           </g>
         ))}
       </svg>

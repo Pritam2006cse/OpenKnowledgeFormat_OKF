@@ -20,9 +20,9 @@ export interface QueuedFile {
   ext: string;
   stage: QueueStage;
   progress: number; // 0-100 for the current stage
-  markdownName?: string;
-  markdown?: string;
-  error?: string;
+  markdownName?: string | undefined;
+  markdown?: string | undefined;
+  error?: string | undefined;
 }
 
 export interface SourceDocument {
@@ -31,7 +31,7 @@ export interface SourceDocument {
   markdownName: string;
   markdown: string;
   status: ValidationStatus;
-  error?: string;
+  error?: string | undefined;
   createdAt: string;
 }
 
@@ -42,8 +42,8 @@ export interface KnowledgeItem {
   type: KnowledgeType;
   description: string;
   status: ValidationStatus;
-  sourcePage?: number;
-  issue?: string;
+  sourcePage?: number | undefined;
+  issue?: string | undefined;
   createdAt: string;
 }
 
