@@ -4,6 +4,28 @@
 //   processFile  -> POST /process
 // Signatures stay the same so the UI does not change.
 import type { KnowledgeItem, ProcessResult } from "./types";
+const API_BASE_URL = "http://localhost:8080";
+
+export interface SearchResult {
+  id: string;
+  title: string;
+  score: number;
+}
+
+export async function searchKnowledge(
+  query: string
+): Promise<SearchResult[]> {
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to search OKF backend");
+  }
+
+  return response.json();
+}
 
 export const SUPPORTED_EXTENSIONS = ["pdf", "docx", "txt", "md"];
 
@@ -20,21 +42,82 @@ export async function uploadFile(file: File, onProgress: (p: number) => void): P
   if (file.size === 0) throw new Error("File is empty");
 }
 
-export async function convertFile(file: File, onProgress: (p: number) => void): Promise<{ markdownName: string; markdown: string }> {
-  const base = file.name.replace(/\.[^.]+$/, "");
-  const ext = file.name.split(".").pop()?.toLowerCase();
-  for (let p = 0; p <= 100; p += 25) {
-    onProgress(p);
-    await wait(130);
-  }
-  let markdown: string;
+export async function convertFile(
+  file: File,
+  onProgress: (p: number) => void
+): Promise<{ markdownName: string; markdown: string }> {
+
+  const ext =
+    file.name.split(".").pop()?.toLowerCase() ?? "";
+
+  // Markdown and text files don't need PDF conversion
   if (ext === "md" || ext === "txt") {
+
+    onProgress(20);
+
     const text = await file.text();
-    markdown = ext === "md" ? text : `# ${base.replace(/[_-]+/g, " ")}\n\n${text}`;
-  } else {
-    markdown = `# ${base.replace(/[_-]+/g, " ")}\n\n## Overview\n\nContent extracted from ${file.name}. The real backend (PyMuPDF) will provide the full text here.\n\n## Key Points\n\nSection-level knowledge will be structured from headings in this document.\n`;
+
+    onProgress(100);
+
+    const base =
+      file.name.replace(/\.[^.]+$/, "");
+
+    const markdown =
+      ext === "md"
+        ? text
+        : `# ${base.replace(/[_-]+/g, " ")}\n\n${text}`;
+
+    return {
+      markdownName: `${base}.md`,
+      markdown,
+    };
   }
-  return { markdownName: `${base}.md`, markdown };
+
+  // PDF → real backend conversion
+  if (ext === "pdf") {
+
+    onProgress(10);
+
+    const formData = new FormData();
+
+    formData.append("file", file);
+
+    onProgress(30);
+
+    const response = await fetch(
+      "http://localhost:8080/api/convert",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    onProgress(80);
+
+    if (!response.ok) {
+
+      const message =
+        await response.text();
+
+      throw new Error(
+        message || "PDF conversion failed"
+      );
+    }
+
+    const data =
+      await response.json();
+
+    onProgress(100);
+
+    return {
+      markdownName: data.markdownName,
+      markdown: data.markdown,
+    };
+  }
+
+  throw new Error(
+    `Conversion for .${ext} is not implemented yet`
+  );
 }
 
 export async function processFile(
