@@ -4,28 +4,6 @@
 //   processFile  -> POST /process
 // Signatures stay the same so the UI does not change.
 import type { KnowledgeItem, ProcessResult } from "./types";
-const API_BASE_URL = "http://localhost:8080";
-
-export interface SearchResult {
-  id: string;
-  title: string;
-  score: number;
-}
-
-export async function searchKnowledge(
-  query: string
-): Promise<SearchResult[]> {
-
-  const response = await fetch(
-    `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to search OKF backend");
-  }
-
-  return response.json();
-}
 
 export const SUPPORTED_EXTENSIONS = ["pdf", "docx", "txt", "md"];
 
@@ -42,82 +20,21 @@ export async function uploadFile(file: File, onProgress: (p: number) => void): P
   if (file.size === 0) throw new Error("File is empty");
 }
 
-export async function convertFile(
-  file: File,
-  onProgress: (p: number) => void
-): Promise<{ markdownName: string; markdown: string }> {
-
-  const ext =
-    file.name.split(".").pop()?.toLowerCase() ?? "";
-
-  // Markdown and text files don't need PDF conversion
+export async function convertFile(file: File, onProgress: (p: number) => void): Promise<{ markdownName: string; markdown: string }> {
+  const base = file.name.replace(/\.[^.]+$/, "");
+  const ext = file.name.split(".").pop()?.toLowerCase();
+  for (let p = 0; p <= 100; p += 25) {
+    onProgress(p);
+    await wait(130);
+  }
+  let markdown: string;
   if (ext === "md" || ext === "txt") {
-
-    onProgress(20);
-
     const text = await file.text();
-
-    onProgress(100);
-
-    const base =
-      file.name.replace(/\.[^.]+$/, "");
-
-    const markdown =
-      ext === "md"
-        ? text
-        : `# ${base.replace(/[_-]+/g, " ")}\n\n${text}`;
-
-    return {
-      markdownName: `${base}.md`,
-      markdown,
-    };
+    markdown = ext === "md" ? text : `# ${base.replace(/[_-]+/g, " ")}\n\n${text}`;
+  } else {
+    markdown = `# ${base.replace(/[_-]+/g, " ")}\n\n## Overview\n\nContent extracted from ${file.name}. The real backend (PyMuPDF) will provide the full text here.\n\n## Key Points\n\nSection-level knowledge will be structured from headings in this document.\n`;
   }
-
-  // PDF → real backend conversion
-  if (ext === "pdf") {
-
-    onProgress(10);
-
-    const formData = new FormData();
-
-    formData.append("file", file);
-
-    onProgress(30);
-
-    const response = await fetch(
-      "http://localhost:8080/api/convert",
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
-
-    onProgress(80);
-
-    if (!response.ok) {
-
-      const message =
-        await response.text();
-
-      throw new Error(
-        message || "PDF conversion failed"
-      );
-    }
-
-    const data =
-      await response.json();
-
-    onProgress(100);
-
-    return {
-      markdownName: data.markdownName,
-      markdown: data.markdown,
-    };
-  }
-
-  throw new Error(
-    `Conversion for .${ext} is not implemented yet`
-  );
+  return { markdownName: `${base}.md`, markdown };
 }
 
 export async function processFile(
@@ -158,7 +75,7 @@ function extractItems(md: string, documentId: string, now: string): KnowledgeIte
       id: uid(),
       documentId,
       title: current.title,
-      type: current.level === 1 ? "Topic" : /\d/.test(description.slice(0, 60)) ? "Metric" : TYPES[1 + (idx % 4)],
+      type: current.level === 1 ? "Topic" : /\d/.test(description.slice(0, 60)) ? "Metric" : (TYPES[1 + (idx % 4)] ?? "Concept"),
       description: description || "No content found under this heading.",
       status: missing ? "review" : "valid",
       issue: missing ? "Heading has little or no supporting content." : undefined,
@@ -170,7 +87,7 @@ function extractItems(md: string, documentId: string, now: string): KnowledgeIte
     const m = line.match(/^(#{1,3})\s+(.*)/);
     if (m) {
       flush();
-      current = { title: m[2].trim(), level: m[1].length, body: [] };
+      current = { title: (m[2] ?? "").trim(), level: (m[1] ?? "#").length, body: [] };
     } else if (current) current.body.push(line);
     else if (line.trim()) current = { title: "Introduction", level: 2, body: [line] };
   }
