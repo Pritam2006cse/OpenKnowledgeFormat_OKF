@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { searchKnowledge, type BackendSearchResult } from "@/lib/okf/api";
+import { searchKnowledge, fetchMarkdown,type BackendSearchResult } from "@/lib/okf/api";
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, ArrowRight, FileText, Search as SearchIcon, X } from "lucide-react";
 import { useOkf } from "@/lib/okf/store";
@@ -259,7 +259,18 @@ export function KnowledgeSearch() {
 
                           {d && (
                             <button
-                              onClick={() => setMdDoc(d)}
+                              onClick={async () => {
+                                try {
+                                  const markdown = await fetchMarkdown(d.markdownName);
+
+                                  setMdDoc({
+                                    ...d,
+                                    markdown,
+                                  });
+                                } catch (error) {
+                                  console.error("Failed to load Markdown:", error);
+                                }
+                              }}
                               className="rounded-lg border px-3 py-1.5 text-xs font-semibold hover:bg-accent"
                             >
                               Preview Source
@@ -283,7 +294,23 @@ export function KnowledgeSearch() {
           <Field label="Original document">{docById[open.documentId]?.originalName}</Field>
           <Field label="Validation"><StatusBadge status={open.status} />{open.issue && <p className="mt-2 text-sm text-muted-foreground">{open.issue}</p>}</Field>
           {open.sourcePage && <Field label="Source page">Page {open.sourcePage}</Field>}
-          <button onClick={() => setMdDoc(docById[open.documentId] ?? null)} className="lift inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground">
+          <button
+            onClick={async () => {
+              const doc = docById[open.documentId];
+              if (!doc) return;
+              try {
+                const markdown = await fetchMarkdown(doc.markdownName);
+                setOpen(null);
+                setMdDoc({
+                  ...doc,
+                  markdown,
+                });
+              } catch (error) {
+                console.error("Failed to load Markdown:", error);
+              }
+            }}
+            className="lift inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+          >
             <FileText className="h-4 w-4" /> Preview Source
           </button>
         </Drawer>
