@@ -63,7 +63,7 @@ public class SearchEngineV2 {
 
         // Highest score first
         results.sort(
-                Comparator.comparingInt(
+                Comparator.comparingDouble(
                         SearchResult::getScore
                 ).reversed()
         );

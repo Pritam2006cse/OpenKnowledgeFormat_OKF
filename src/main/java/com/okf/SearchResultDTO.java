@@ -4,13 +4,13 @@ public class SearchResultDTO {
 
     private String id;
     private String title;
-    private int score;
+    private double score;
     private String snippet;
 
     public SearchResultDTO(
             String id,
             String title,
-            int score,
+            double score,
             String snippet) {
 
         this.id = id;
@@ -27,7 +27,7 @@ public class SearchResultDTO {
         return title;
     }
 
-    public int getScore() {
+    public double getScore() {
         return score;
     }
 

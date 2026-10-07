@@ -43,7 +43,7 @@ public class Main {
     int rank = 1;
 
     for (SearchResult result : results) {
-      System.out.println(rank + ". " + result.getDocument().getTitle() + " | Score: " + result.getScore());
+      System.out.println(rank + ". " + result.getDocument().getTitle() + " | Score: " + String.format("%.4f",result.getScore()));
       rank++;
     }
 
