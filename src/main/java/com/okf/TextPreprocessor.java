@@ -1,4 +1,11 @@
 package com.okf;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.en.EnglishAnalyzer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TextPreprocessor {
     public static String cleanMarkdown(String markdown) {
@@ -26,5 +33,25 @@ public class TextPreprocessor {
         text = text.replaceAll("\\s+"," ");
 
         return text.trim().toLowerCase();
+    }
+
+    public static List<String> process(String text)
+    {
+        List<String> terms = new ArrayList<>();
+        String cleaned = cleanMarkdown(text);
+        try{
+            Analyzer analyzer = new EnglishAnalyzer();
+            TokenStream tokenStream = analyzer.tokenStream("content", cleaned);
+            CharTermAttribute termAttribute = tokenStream.addAttribute(CharTermAttribute.class);
+            tokenStream.reset();
+            while (tokenStream.incrementToken()) {
+                   terms.add(termAttribute.toString());
+                }
+            tokenStream.end();
+        }
+        catch(IOException e){
+            throw new RuntimeException("Error processing text",e);
+        }
+        return terms;
     }
 }

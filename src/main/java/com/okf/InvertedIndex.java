@@ -13,19 +13,10 @@ public class InvertedIndex {
     
     public void buildIndex(List<Document> documents) {
         for (Document document : documents) {
-            String content = TextPreprocessor.cleanMarkdown(document.getContent());
-            String[] words = content.split("\\W+");
-            for (String word : words) {
-                if (word.isEmpty()) {
-                    continue;
-                }
-                index.putIfAbsent(
-                        word,
-                        new HashSet<>()
-                );
-                index.get(word).add(
-                        document.getId()
-                );
+            List<String> terms = TextPreprocessor.process(document.getContent());
+            for (String term : terms) {
+                index.putIfAbsent(term, new HashSet<>());
+                index.get(term).add(document.getId());
             }
         }
     }

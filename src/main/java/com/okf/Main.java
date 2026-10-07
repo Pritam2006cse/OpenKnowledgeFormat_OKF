@@ -23,12 +23,6 @@ public class Main {
 
     System.out.println("Index construction time: "+ indexTime+ " ms");
 
-    // Test inverted index
-    String indexTestWord = "tcp";
-    System.out.println("\nDocuments containing: "+ indexTestWord);
-
-    System.out.println(invertedIndex.getDocuments(indexTestWord));
-
     // 2. Create search engine
     SearchEngine searchEngine = new SearchEngine(documents,invertedIndex);
 
