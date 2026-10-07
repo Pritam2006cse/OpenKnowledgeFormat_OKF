@@ -1,9 +1,6 @@
 com\okf\SearchService.class
-com\okf\SearchController.class
 com\okf\Document.class
 com\okf\SearchEngine.class
-com\okf\SearchResultDTO.class
-com\okf\SearchEngineV2.class
 com\okf\BenchmarkV4.class
 com\okf\OKFApplication.class
 com\okf\MarkdownLoader.class

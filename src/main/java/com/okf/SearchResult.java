@@ -2,15 +2,15 @@ package com.okf;
 
 public class SearchResult {
     private Document document;
-    private int score;
-    public SearchResult(Document document, int score){
+    private double score;
+    public SearchResult(Document document, double score){
         this.document = document;
         this.score = score;
     }
     public Document getDocument(){
         return document;
     }
-    public int getScore(){
+    public double getScore(){
         return score;
     }
 }
