@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 export function IntroLoader({ onDone }: { onDone: () => void }) {
   const [leaving, setLeaving] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
 
   // --------------------------------------------------
   // EXISTING INTRO BUSINESS LOGIC
@@ -89,7 +90,12 @@ export function IntroLoader({ onDone }: { onDone: () => void }) {
 
       const elapsed =
         time - startTime;
+      const animationDuration = 3100;
+      const progress = Math.min(elapsed / animationDuration, 1);
 
+      if (progressRef.current) {
+        progressRef.current.style.transform = `scaleX(${progress})`;
+      }
       ctx.clearRect(
         0,
         0,
@@ -472,17 +478,17 @@ export function IntroLoader({ onDone }: { onDone: () => void }) {
           <div
             className="mx-auto mt-6 h-0.5 w-56 overflow-hidden rounded"
             style={{
-              background:
-                "rgba(255,255,255,0.12)",
+              background: "rgba(255,255,255,0.12)",
             }}
           >
             <div
-              className="h-full animate-grow"
+              ref={progressRef}
+              className="h-full origin-left"
               style={{
+                transform: "scaleX(0)",
                 background:
                   "linear-gradient(90deg, #ff00ff, #7b5cff, #00d9ff)",
-                boxShadow:
-                  "0 0 12px #00d9ff",
+                boxShadow: "0 0 12px #00d9ff",
               }}
             />
           </div>
