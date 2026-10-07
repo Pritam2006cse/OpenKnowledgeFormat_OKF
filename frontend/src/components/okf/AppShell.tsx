@@ -12,11 +12,22 @@ const NAV = [
 
 function Logo() {
   return (
-    <div className="flex items-center gap-2">
-      <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary font-display text-sm font-bold text-primary-foreground">
-        O
+    <div className="flex items-center gap-3">
+      <img
+        src="/okf-logo.png"
+        alt="OKF"
+        className="h-11 w-11 object-contain"
+      />
+
+      <div className="flex flex-col leading-none">
+        <span className="font-display text-xl font-bold tracking-[0.12em] text-foreground">
+          OKF
+        </span>
+
+        <span className="mt-1 text-[8px] font-medium tracking-[0.18em] text-muted-foreground">
+          OPEN KNOWLEDGE FORMAT
+        </span>
       </div>
-      <span className="font-display text-lg font-semibold tracking-tight">OKF</span>
     </div>
   );
 }
@@ -40,7 +51,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
       <PageBackdrop path={path} />
       <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex h-[76px] max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
           <Logo />
           <nav className="flex items-center gap-1 rounded-xl border bg-card p-1 shadow-soft">
             {NAV.map(({ to, label, icon: Icon }) => (
@@ -48,7 +59,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={to}
                 to={to}
                 activeOptions={{ exact: true }}
-                className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-muted-foreground transition-all duration-200 hover:-translate-y-px hover:bg-muted hover:text-foreground data-[status=active]:bg-accent data-[status=active]:text-accent-foreground"
+                className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-muted-foreground transition-all duration-200 hover:-translate-y-px hover:bg-muted hover:text-foreground data-[status=active]:bg-accent data-[status=active]:text-accent-foreground"
               >
                 <Icon className="h-4 w-4" />
                 <span className="hidden sm:inline">{label}</span>
