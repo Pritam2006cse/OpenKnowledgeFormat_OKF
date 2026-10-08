@@ -8,6 +8,7 @@ import java.util.List;
 public class SearchService {
 
     private volatile SearchEngine searchEngine;
+    private volatile SemanticSearchEngine semanticSearchEngine;
 
     public SearchService() throws Exception {
         reloadIndex();
@@ -17,23 +18,38 @@ public class SearchService {
 
         System.out.println("Reloading OKF search index...");
 
-        // 1. Load all Markdown documents
         MarkdownLoader loader = new MarkdownLoader();
 
         List<Document> documents =
                 loader.loadDocuments("knowledge");
 
-        // 2. Build a fresh inverted index
+        // -----------------------------
+        // Level 2 index
+        // -----------------------------
+
         InvertedIndex invertedIndex =
                 new InvertedIndex();
 
         invertedIndex.buildIndex(documents);
 
-        // 3. Create a new search engine
         searchEngine =
                 new SearchEngine(
                         documents,
                         invertedIndex
+                );
+
+        // -----------------------------
+        // Level 3 semantic index
+        // -----------------------------
+
+        SemanticIndex semanticIndex =
+                new SemanticIndex();
+
+        semanticIndex.buildIndex(documents);
+
+        semanticSearchEngine =
+                new SemanticSearchEngine(
+                        semanticIndex
                 );
 
         System.out.println(
@@ -46,12 +62,20 @@ public class SearchService {
         );
 
         System.out.println(
-                "Search index reloaded successfully."
+                "Search indexes reloaded successfully."
         );
     }
 
+    // Level 2
     public List<SearchResult> search(String query) {
 
         return searchEngine.search(query);
+    }
+
+    // Level 3
+    public List<SearchResult> semanticSearch(
+            String query) throws Exception {
+
+        return semanticSearchEngine.search(query);
     }
 }

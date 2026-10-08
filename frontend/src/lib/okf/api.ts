@@ -109,7 +109,7 @@ export async function searchKnowledge(
 ): Promise<BackendSearchResult[]> {
 
   const response = await fetch(
-    `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}`
+    `${API_BASE_URL}/api/search?q=${encodeURIComponent(query)}&mode=semantic`
   );
 
   if (!response.ok) {
