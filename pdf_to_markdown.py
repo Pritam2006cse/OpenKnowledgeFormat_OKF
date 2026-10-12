@@ -16,7 +16,7 @@ def pdf_to_markdown(pdf_path,output_path):
         text = page.get_text("text").strip()
         if not text:
             continue
-        markdown.append(f"##{page_number}\n")
+        markdown.append(f"## Page{page_number}\n")
         markdown.append(text)
         markdown.append("\n")
 

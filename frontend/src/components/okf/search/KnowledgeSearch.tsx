@@ -1,3 +1,4 @@
+import { DocumentChat } from "../knowledge/DocumentChat";
 import { useEffect, useMemo, useState } from "react";
 import { searchKnowledge, fetchMarkdown,type BackendSearchResult } from "@/lib/okf/api";
 import { Link } from "@tanstack/react-router";
@@ -307,6 +308,7 @@ export function KnowledgeSearch() {
           <pre className="whitespace-pre-wrap break-words rounded-2xl border bg-muted p-5 font-mono text-[13px] leading-relaxed">
             {mdDoc.markdown}
           </pre>
+          <DocumentChat markdownName={mdDoc.markdownName} />
         </Drawer>
       )}
     </div>

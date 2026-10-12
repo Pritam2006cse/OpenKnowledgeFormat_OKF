@@ -1,3 +1,4 @@
+import { DocumentChat } from "./DocumentChat";
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { createPortal } from "react-dom";
@@ -211,9 +212,20 @@ export function KnowledgeLibrary() {
         </Drawer>
       )}
       {mdDoc && (
-        <Drawer title="Generated Markdown" onClose={() => setMdDoc(null)} wide>
-          <p className="text-sm text-muted-foreground">Converted from: <span className="font-medium text-foreground">{mdDoc.originalName}</span> → <span className="font-mono">{mdDoc.markdownName}</span></p>
-          <pre className="mt-2 whitespace-pre-wrap break-words rounded-2xl border bg-muted p-5 font-mono text-[13px] leading-relaxed">{mdDoc.markdown}</pre>
+        <Drawer
+          title="Generated Markdown"
+          onClose={() => setMdDoc(null)}
+          wide
+        >
+          <p className="text-sm text-muted-foreground">
+            Converted from: {mdDoc.originalName} → {mdDoc.markdownName}
+          </p>
+
+          <pre className="mt-2 whitespace-pre-wrap break-words rounded-2xl border bg-muted p-5 font-mono text-[13px] leading-relaxed">
+            {mdDoc.markdown}
+          </pre>
+
+          <DocumentChat markdownName={mdDoc.markdownName} />
         </Drawer>
       )}
     </div>

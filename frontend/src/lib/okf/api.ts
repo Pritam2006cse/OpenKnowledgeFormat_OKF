@@ -139,3 +139,49 @@ export async function fetchMarkdown(
 
   return data.markdown;
 }
+
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface DocumentChatResponse {
+  markdownName: string;
+  answer: string;
+}
+
+export async function chatWithDocument(
+  markdownName: string,
+  message: string,
+  history: ChatMessage[],
+): Promise<DocumentChatResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      markdownName,
+      message,
+      history,
+    }),
+  });
+
+  if (!response.ok) {
+    let errorMessage = `Chat failed: ${response.status}`;
+
+    try {
+      const data = await response.json();
+      if (data.message) {
+        errorMessage = data.message;
+      }
+    } catch {
+      // Keep the fallback error message.
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  return response.json() as Promise<DocumentChatResponse>;
+}

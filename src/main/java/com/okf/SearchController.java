@@ -22,28 +22,38 @@ public class SearchController {
         this.searchService = searchService;
     }
 
-    @GetMapping("/search")
-    public List<SearchResultDTO> search(
-            @RequestParam("q") String q,
-            @RequestParam(
-                    value = "mode",
-                    defaultValue = "keyword"
-            ) String mode
-    ) throws Exception {
-
-        List<SearchResult> results;
+    
+        @GetMapping("/search")
+        public List<SearchResultDTO> search(
+                @RequestParam("q") String q,
+                @RequestParam(
+                        value = "mode",
+                        defaultValue = "keyword"
+                ) String mode
+        ) throws Exception {
 
         if ("semantic".equalsIgnoreCase(mode)) {
-
-            results =
-                    searchService.semanticSearch(q);
-
-        } else {
-
-            results =
-                    searchService.search(q);
+                List<SearchResult> results = searchService.semanticSearch(q);
+                if (results.isEmpty()) {
+                        return List.of();
+                }
+                // Step 1: Select the best semantic document.
+                SearchResult bestDocument = results.get(0);
+                // Step 2: Retrieve a passage from that document.
+                PassageRetriever passageRetriever = new PassageRetriever();
+                String passage = passageRetriever.findBestPassage(bestDocument.getDocument().getContent(),q);
+                // Step 3: Return the passage and its source.
+                return List.of(new SearchResultDTO(
+                                bestDocument.getDocument().getId(),
+                                bestDocument.getDocument().getTitle(),
+                                bestDocument.getScore(),
+                                passage
+                        )
+                );
         }
 
+        // Preserve the existing keyword-search behavior.
+        List<SearchResult> results = searchService.search(q);
         return results.stream()
                 .map(result ->
                         new SearchResultDTO(
@@ -51,14 +61,14 @@ public class SearchController {
                                 result.getDocument().getTitle(),
                                 result.getScore(),
                                 createSnippet(
-                                        result.getDocument()
-                                                .getContent(),
+                                        result.getDocument().getContent(),
                                         q
                                 )
                         )
                 )
                 .toList();
-    }
+        }
+
 
     @GetMapping("/markdown")
     public Map<String, String> getMarkdown(
