@@ -3,7 +3,12 @@
 //   convertFile  -> (part of POST /upload or POST /convert)
 //   processFile  -> POST /process
 // Signatures stay the same so the UI does not change.
-import type { KnowledgeItem, ProcessResult } from "./types";
+import type {
+  KnowledgeItem,
+  OKFMetadata,
+  ProcessResult,
+  SourceDocument,
+} from "./types";
 
 export const SUPPORTED_EXTENSIONS = ["pdf", "docx", "txt", "md"];
 
@@ -37,6 +42,24 @@ export async function convertFile(file: File, onProgress: (p: number) => void): 
   return { markdownName: `${base}.md`, markdown };
 }
 
+
+function createMetadata(
+  type: string,
+  title: string,
+  description: string,
+  resource: string,
+  tags: string[] = [],
+): OKFMetadata {
+  return {
+    type,
+    title,
+    description,
+    tags,
+    resource,
+    timestamp: new Date().toISOString().slice(0, 10),
+  };
+}
+
 export async function processFile(
   originalName: string,
   markdownName: string,
@@ -53,18 +76,68 @@ export async function processFile(
   const items = extractItems(markdown, documentId, now);
   const terms = new Set(markdown.toLowerCase().match(/[a-z]{3,}/g) ?? []);
   const anyIssue = items.some((i) => i.status !== "valid");
+  const documentTitle = markdownName.replace(/\.md$/i, "")
+    .replace(/[_-]+/g, " ");
+
+  const documentMetadata = createMetadata(
+    "document",
+    documentTitle,
+    `Knowledge extracted from ${originalName}.`,
+    documentTitle.replace(/\s+/g, "_"),
+    [...new Set(
+      documentTitle.toLowerCase().match(/[a-z0-9]+/g) ?? []
+    )],
+  );
+
+  const itemsWithMetadata = items.map((item) => {
+    const tags = [
+      ...new Set(
+        `${item.title} ${item.description}`
+          .toLowerCase()
+          .match(/[a-z0-9]+/g) ?? []
+      ),
+    ].slice(0, 10);
+
+    const metadata = createMetadata(
+      item.type.toLowerCase(),
+      item.title,
+      item.description,
+      documentMetadata.resource,
+      tags,
+    );
+
+    return {
+      ...item,
+      metadata,
+    };
+  });
+
+  const document: SourceDocument = {
+    id: documentId,
+    originalName,
+    markdownName,
+    markdown,
+    status: anyIssue ? "review" : "valid",
+    createdAt: now,
+    metadata: documentMetadata,
+  };
+
   return {
-    document: { id: documentId, originalName, markdownName, markdown, status: anyIssue ? "review" : "valid", createdAt: now },
-    items,
+    document,
+    items: itemsWithMetadata,
     termsIndexed: terms.size,
   };
 }
 
 const TYPES = ["Topic", "Concept", "Definition", "Fact", "Entity", "Metric"];
 
-function extractItems(md: string, documentId: string, now: string): KnowledgeItem[] {
+function extractItems(
+  md: string,
+  documentId: string,
+  now: string,
+): Omit<KnowledgeItem, "metadata">[] {
   const lines = md.split("\n");
-  const items: KnowledgeItem[] = [];
+  const items: Omit<KnowledgeItem, "metadata">[] = [];
   let current: { title: string; level: number; body: string[] } | null = null;
   const flush = () => {
     if (!current) return;

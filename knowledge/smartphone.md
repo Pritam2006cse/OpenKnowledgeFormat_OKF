@@ -9,3 +9,11 @@ communication capabilities.
 
 Samsung, Apple and Google are examples of companies that
 manufacture smartphones.
+
+<!-- OKF_AUTO_LINKS_START -->
+
+## Related Documents
+
+- [Laptops](laptop.md)
+
+<!-- OKF_AUTO_LINKS_END -->

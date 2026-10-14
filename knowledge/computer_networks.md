@@ -9,3 +9,13 @@ Routers, switches and access points are common networking
 devices.
 
 Computer networks can be classified as LAN, MAN and WAN.
+
+<!-- OKF_AUTO_LINKS_START -->
+
+## Related Documents
+
+- [Okf Sample Knowledge](OKF_sample_knowledge.md)
+- [Okf Sample Knowledge](sample.md)
+- [Laptops](laptop.md)
+
+<!-- OKF_AUTO_LINKS_END -->

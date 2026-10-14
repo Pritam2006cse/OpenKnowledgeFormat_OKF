@@ -188,7 +188,25 @@ export function KnowledgeLibrary() {
       {open && (
         <Drawer title={open.title} onClose={() => setOpen(null)}>
           <Field label="Type">{open.type}</Field>
-          <Field label="Description">{open.description}</Field>
+          
+          <Field label="Metadata Type">{open.metadata.type}</Field>
+          <Field label="Metadata Title">{open.metadata.title}</Field>
+          
+          <Field label="Tags">
+            <div className="flex flex-wrap gap-2">
+              {open.metadata.tags.map((tag) => (
+                <span key={tag} className="okf-pill">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          </Field>
+          <Field label="Resource">
+            <span className="font-mono text-sm">
+              {open.metadata.resource}
+            </span>
+          </Field>
+          <Field label="Timestamp">{open.metadata.timestamp}</Field>
           <Field label="Original document">{docById[open.documentId]?.originalName}</Field>
           <Field label="Generated Markdown"><span className="font-mono">{docById[open.documentId]?.markdownName}</span></Field>
           <Field label="Validation"><StatusBadge status={open.status} />{open.issue && <p className="mt-2 text-sm text-muted-foreground">{open.issue}</p>}</Field>
@@ -211,6 +229,7 @@ export function KnowledgeLibrary() {
           </button>
         </Drawer>
       )}
+      
       {mdDoc && (
         <Drawer
           title="Generated Markdown"
@@ -221,13 +240,53 @@ export function KnowledgeLibrary() {
             Converted from: {mdDoc.originalName} → {mdDoc.markdownName}
           </p>
 
-          <pre className="mt-2 whitespace-pre-wrap break-words rounded-2xl border bg-muted p-5 font-mono text-[13px] leading-relaxed">
+          {/* Document Metadata — INSERTED HERE */}
+          <div className="mt-4 space-y-4 rounded-xl border p-4">
+            <h3 className="font-semibold">Document Metadata</h3>
+
+            <Field label="Type">
+              {mdDoc.metadata.type}
+            </Field>
+
+            <Field label="Title">
+              {mdDoc.metadata.title}
+            </Field>
+
+            <Field label="Description">
+              {mdDoc.metadata.description}
+            </Field>
+
+            <Field label="Tags">
+              <div className="flex flex-wrap gap-2">
+                {mdDoc.metadata.tags.map((tag) => (
+                  <span key={tag} className="okf-pill">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </Field>
+
+            <Field label="Resource">
+              <span className="font-mono text-sm">
+                {mdDoc.metadata.resource}
+              </span>
+            </Field>
+
+            <Field label="Timestamp">
+              {mdDoc.metadata.timestamp}
+            </Field>
+          </div>
+
+          {/* Existing Markdown Preview */}
+          <pre className="mt-4 whitespace-pre-wrap break-words rounded-2xl border bg-muted p-5 font-mono text-[13px] leading-relaxed">
             {mdDoc.markdown}
           </pre>
 
+          {/* Existing Chatbot */}
           <DocumentChat markdownName={mdDoc.markdownName} />
         </Drawer>
       )}
+
     </div>
   );
 }

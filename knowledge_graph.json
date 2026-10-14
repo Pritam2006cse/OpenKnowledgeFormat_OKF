@@ -1,0 +1,31 @@
+{
+  "version" : 1,
+  "generatedAt" : "2026-10-13T20:20:21.766695Z",
+  "documentCount" : 8,
+  "relationshipCount" : 4,
+  "edges" : [ {
+    "source" : "OKF_sample_knowledge.md",
+    "target" : "computer_networks.md",
+    "score" : 0.7366096075946447,
+    "relationship" : "semantic_similarity",
+    "origin" : "auto"
+  }, {
+    "source" : "computer_networks.md",
+    "target" : "sample.md",
+    "score" : 0.7366096075946447,
+    "relationship" : "semantic_similarity",
+    "origin" : "auto"
+  }, {
+    "source" : "laptop.md",
+    "target" : "smartphone.md",
+    "score" : 0.5681357958884797,
+    "relationship" : "semantic_similarity",
+    "origin" : "auto"
+  }, {
+    "source" : "OKF_sample_knowledge.md",
+    "target" : "sample.md",
+    "score" : 1.0,
+    "relationship" : "semantic_similarity",
+    "origin" : "auto"
+  } ]
+}

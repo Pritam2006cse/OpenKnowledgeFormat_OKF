@@ -20,3 +20,11 @@ Test Keywords
 This document intentionally contains the terms: TCP, reliable communication, sequence numbers,
 acknowledgement, IP address, routing, DNS, domain name, and network.
 
+<!-- OKF_AUTO_LINKS_START -->
+
+## Related Documents
+
+- [Okf Sample Knowledge](OKF_sample_knowledge.md)
+- [Computer Networks](computer_networks.md)
+
+<!-- OKF_AUTO_LINKS_END -->

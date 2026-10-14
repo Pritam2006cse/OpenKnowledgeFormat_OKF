@@ -25,12 +25,23 @@ export interface QueuedFile {
   error?: string | undefined;
 }
 
+
+export interface OKFMetadata {
+  type: string;
+  title: string;
+  description: string;
+  tags: string[];
+  resource: string;
+  timestamp: string; // YYYY-MM-DD
+}
+
 export interface SourceDocument {
   id: string;
   originalName: string;
   markdownName: string;
   markdown: string;
   status: ValidationStatus;
+  metadata: OKFMetadata;
   error?: string | undefined;
   createdAt: string;
 }
@@ -41,11 +52,13 @@ export interface KnowledgeItem {
   title: string;
   type: KnowledgeType;
   description: string;
+  metadata: OKFMetadata;
   status: ValidationStatus;
   sourcePage?: number | undefined;
   issue?: string | undefined;
   createdAt: string;
 }
+
 
 export interface ProcessResult {
   document: SourceDocument;

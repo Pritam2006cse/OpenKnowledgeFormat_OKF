@@ -42,15 +42,15 @@ public class SearchService {
         // Level 3 semantic index
         // -----------------------------
 
-        SemanticIndex semanticIndex =
-                new SemanticIndex();
-
+        SemanticIndex semanticIndex = new SemanticIndex();
         semanticIndex.buildIndex(documents);
 
-        semanticSearchEngine =
-                new SemanticSearchEngine(
-                        semanticIndex
-                );
+        // Automatically add links to related Markdown files.
+        MarkdownLinkGenerator linkGenerator = new MarkdownLinkGenerator();
+        linkGenerator.generateLinks(
+                semanticIndex.getDocumentEmbeddings()
+        );
+        semanticSearchEngine = new SemanticSearchEngine(semanticIndex);
 
         System.out.println(
                 "OKF Search Engine initialized."

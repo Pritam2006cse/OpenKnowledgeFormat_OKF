@@ -74,9 +74,22 @@ export const okf = {
     let terms = 0;
     for (const f of ready) {
       patchFile(f.id, { stage: "processing" });
+      const now = new Date().toISOString();
       const placeholder: SourceDocument = {
-        id: `pending-${f.id}`, originalName: f.name, markdownName: f.markdownName!, markdown: f.markdown!,
-        status: "processing", createdAt: new Date().toISOString(),
+        id: `pending-${f.id}`,
+        originalName: f.name,
+        markdownName: f.markdownName!,
+        markdown: f.markdown!,
+        status: "processing",
+        createdAt: now,
+        metadata: {
+          type: "document",
+          title: f.markdownName!.replace(/\.md$/i, "").replace(/[_-]+/g, " "),
+          description: `Processing ${f.name}.`,
+          tags: [],
+          resource: f.markdownName!.replace(/\.md$/i, "").replace(/\s+/g, "_"),
+          timestamp: now.slice(0, 10),
+        },
       };
       set((s) => ({ documents: [placeholder, ...s.documents] }));
       try {
