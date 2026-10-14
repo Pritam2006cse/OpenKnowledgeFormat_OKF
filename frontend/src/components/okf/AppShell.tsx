@@ -1,3 +1,4 @@
+
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Library, Search, UploadCloud } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
@@ -10,21 +11,31 @@ const NAV = [
   { to: "/search", label: "Search", icon: Search },
 ] as const;
 
-function Logo() {
+function Logo({ dark }: { dark: boolean }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="okf-brand flex items-center gap-3">
       <img
         src="/okf-logo.png"
         alt="OKF"
-        className="h-11 w-11 object-contain"
+        className="h-12 w-12 shrink-0 object-contain"
       />
 
       <div className="flex flex-col leading-none">
-        <span className="font-display text-xl font-bold tracking-[0.12em] text-foreground">
+        <span
+          className={cn(
+            "font-display text-xl font-bold tracking-[0.12em]",
+            dark ? "text-white" : "text-foreground"
+          )}
+        >
           OKF
         </span>
 
-        <span className="mt-1 text-[8px] font-medium tracking-[0.18em] text-muted-foreground">
+        <span
+          className={cn(
+            "mt-1.5 text-[8px] font-semibold tracking-[0.18em]",
+            dark ? "text-slate-300" : "text-muted-foreground"
+          )}
+        >
           OPEN KNOWLEDGE FORMAT
         </span>
       </div>
@@ -34,13 +45,21 @@ function Logo() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [intro, setIntro] = useState(true);
+
   useEffect(() => {
-    if (sessionStorage.getItem("okf-intro")) setIntro(false);
+    if (sessionStorage.getItem("okf-intro")) {
+      setIntro(false);
+    }
   }, []);
-  const path = useRouterState({ select: (s) => s.location.pathname });
+
+  const path = useRouterState({
+    select: (s) => s.location.pathname,
+  });
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans">
+    <div
+      className="okf-app-background relative min-h-screen font-sans text-foreground"
+    >
       {intro && (
         <IntroLoader
           onDone={() => {
@@ -49,17 +68,26 @@ export function AppShell({ children }: { children: ReactNode }) {
           }}
         />
       )}
+
       <PageBackdrop path={path} />
-      <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
+
+      <header
+        className="sticky top-0 z-30 border-b border-white/10 bg-[#080d1b]/75 backdrop-blur-xl"
+      >
         <div className="mx-auto flex h-[76px] max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-          <Logo />
-          <nav className="flex items-center gap-1 rounded-xl border bg-card p-1 shadow-soft">
+          <Logo dark />
+
+          <nav className="flex items-center gap-1 rounded-full border border-white/60 bg-white/95 p-1 shadow-soft">
             {NAV.map(({ to, label, icon: Icon }) => (
               <Link
                 key={to}
                 to={to}
                 activeOptions={{ exact: true }}
-                className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-muted-foreground transition-all duration-200 hover:-translate-y-px hover:bg-muted hover:text-foreground data-[status=active]:bg-accent data-[status=active]:text-accent-foreground"
+                className={cn(
+                  "flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-all duration-200 hover:-translate-y-px sm:px-4",
+                  "data-[status=active]:bg-accent data-[status=active]:text-accent-foreground",
+                  "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
+                )}
               >
                 <Icon className="h-4 w-4" />
                 <span className="hidden sm:inline">{label}</span>
@@ -68,32 +96,101 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
         </div>
       </header>
-      <main key={path} className="relative mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12 animate-fade-up">
+
+      <main
+        key={path}
+        className="relative z-10 mx-auto min-h-[calc(100vh-76px)] max-w-6xl px-4 py-8 animate-fade-up sm:px-6 sm:py-12"
+      >
         {children}
       </main>
     </div>
   );
 }
 
-/** Very subtle, page-specific decoration; never competes with content. */
 function PageBackdrop({ path }: { path: string }) {
-  return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-0 overflow-hidden">
+  /*if (path === "/") {
+    return (
       <div
-        className={cn(
-          "absolute h-[520px] w-[520px] rounded-full bg-accent opacity-50 blur-3xl transition-all duration-1000",
-          path === "/" && "-top-40 left-1/2 -translate-x-1/2",
-          path === "/knowledge" && "-top-60 -right-40",
-          path === "/search" && "top-1/3 -left-60",
-        )}
-      />
-      <svg className="absolute right-8 bottom-8 h-64 w-64 text-primary opacity-[0.06]" viewBox="0 0 100 100">
-        {[[20, 30], [50, 15], [80, 35], [35, 65], [70, 75], [50, 45]].map(([x, y], i, a) => (
-          <g key={i}>
-            <circle cx={x} cy={y} r="2.5" fill="currentColor" />
-            <line x1={x} y1={y} x2={a[5]![0]} y2={a[5]![1]} stroke="currentColor" strokeWidth=".6" />
-          </g>
-        ))}
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
+      >
+        <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-accent opacity-50 blur-3xl" />
+      </div>
+    );
+  }*/
+
+  return (
+    <div
+      aria-hidden="true"
+      className="okf-background-art pointer-events-none fixed inset-0 z-0 overflow-hidden"
+    >
+      {/* Main circle behind the page heading */}
+      <div className="okf-orbit okf-orbit-main">
+        <div className="okf-orbit-ring okf-orbit-ring-one" />
+        <div className="okf-orbit-ring okf-orbit-ring-two" />
+        <div className="okf-orbit-core" />
+      </div>
+
+      {/* Large layered circles in the upper-right */}
+      <div className="okf-orbit okf-orbit-top-right">
+        <div className="okf-orbit-ring okf-orbit-ring-one" />
+        <div className="okf-orbit-ring okf-orbit-ring-two" />
+        <div className="okf-orbit-core" />
+      </div>
+
+      {/* Lower-left layered circle */}
+      <div className="okf-orbit okf-orbit-bottom-left">
+        <div className="okf-orbit-ring okf-orbit-ring-one" />
+        <div className="okf-orbit-ring okf-orbit-ring-two" />
+        <div className="okf-orbit-core" />
+      </div>
+
+      {/* Lower-right blue accent */}
+      <div className="okf-orbit okf-orbit-bottom-right">
+        <div className="okf-orbit-ring okf-orbit-ring-one" />
+        <div className="okf-orbit-ring okf-orbit-ring-two" />
+        <div className="okf-orbit-core" />
+      </div>
+
+      <svg
+        className="absolute inset-0 h-full w-full opacity-40"
+        viewBox="0 0 1440 900"
+        preserveAspectRatio="xMidYMid slice"
+      >
+        <circle
+          cx="400"
+          cy="150"
+          r="205"
+          fill="none"
+          stroke="#087dff"
+          strokeWidth="1.3"
+        />
+        <circle
+          cx="400"
+          cy="150"
+          r="150"
+          fill="none"
+          stroke="#087dff"
+          strokeWidth="1"
+          strokeDasharray="3 7"
+        />
+        <circle
+          cx="1440"
+          cy="650"
+          r="245"
+          fill="none"
+          stroke="#176bff"
+          strokeWidth="1.2"
+        />
+        <circle
+          cx="1440"
+          cy="650"
+          r="195"
+          fill="none"
+          stroke="#176bff"
+          strokeWidth="1"
+          strokeDasharray="3 8"
+        />
       </svg>
     </div>
   );

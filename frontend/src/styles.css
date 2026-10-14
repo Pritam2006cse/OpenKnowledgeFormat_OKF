@@ -651,3 +651,424 @@
     animation: none;
   }
 }
+
+
+
+/* Dark navy background for all non-landing pages */
+/* =========================================================
+   OKF DARK GLASS BACKGROUND
+   Applied only to non-landing pages
+   ========================================================= */
+
+.okf-app-background {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  color: #f1f6ff;
+  background:
+    radial-gradient(
+      ellipse at 48% 0%,
+      rgba(22, 48, 91, 0.28),
+      transparent 52%
+    ),
+    linear-gradient(
+      125deg,
+      #050918 0%,
+      #0b1429 48%,
+      #071225 100%
+    );
+}
+
+/* Layered circle containers */
+.okf-orbit {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.okf-orbit-main {
+  width: 430px;
+  height: 430px;
+  left: 8%;
+  top: 95px;
+  transform: translateY(-8%);
+}
+
+.okf-orbit-top-right {
+  width: 600px;
+  height: 600px;
+  right: -330px;
+  top: -325px;
+}
+
+.okf-orbit-bottom-left {
+  width: 620px;
+  height: 620px;
+  left: -320px;
+  bottom: -400px;
+}
+
+.okf-orbit-bottom-right {
+  width: 440px;
+  height: 440px;
+  right: 7%;
+  bottom: -350px;
+}
+
+/* Soft blue circular cores */
+.okf-orbit-core {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 35% 30%,
+      rgba(15, 111, 245, 0.38),
+      rgba(0, 65, 164, 0.23) 48%,
+      rgba(15, 41, 82, 0.1) 72%,
+      transparent 100%
+    );
+  box-shadow:
+    inset 0 0 55px rgba(31, 105, 226, 0.08),
+    0 0 90px rgba(0, 86, 220, 0.07);
+}
+
+/* Nested transparent rings */
+.okf-orbit-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(77, 148, 255, 0.19);
+}
+
+.okf-orbit-ring-one {
+  inset: 4%;
+  box-shadow:
+    inset 0 0 40px rgba(41, 111, 230, 0.04),
+    0 0 30px rgba(20, 96, 220, 0.035);
+}
+
+.okf-orbit-ring-two {
+  inset: 19%;
+  border-color: rgba(57, 139, 255, 0.24);
+  border-style: dashed;
+}
+
+/* =========================================================
+   LIQUID GLASS CARDS
+   ========================================================= */
+
+.okf-app-background .okf-stat-card,
+.okf-app-background .okf-source-card,
+.okf-app-background .okf-knowledge-card,
+.okf-app-background .okf-search-card,
+.okf-app-background .okf-group {
+  color: #edf4ff;
+  border: 1px solid rgba(185, 211, 255, 0.19);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.105),
+      rgba(118, 158, 221, 0.035) 50%,
+      rgba(255, 255, 255, 0.055)
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 12px 40px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(18px) saturate(135%);
+  -webkit-backdrop-filter: blur(18px) saturate(135%);
+}
+
+.okf-app-background .okf-stat-card:hover,
+.okf-app-background .okf-source-card:hover,
+.okf-app-background .okf-knowledge-card:hover,
+.okf-app-background .okf-search-card:hover {
+  border-color: rgba(117, 176, 255, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.121),
+    0 16px 45px rgba(0, 0, 0, 0.2),
+    0 0 28px rgba(37, 113, 242, 0.07);
+}
+
+/* Large empty states and other translucent panels */
+.okf-app-background .rounded-2xl.border,
+.okf-app-background .rounded-3xl.border {
+  border-color: rgba(185, 211, 255, 0.2);
+  background: rgba(175, 198, 235, 0.13);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    0 20px 55px rgba(0, 0, 0, 0.13);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+}
+
+/* Text inside glass cards */
+.okf-app-background .okf-stat-label,
+.okf-app-background .okf-metadata,
+.okf-app-background .okf-path,
+.okf-app-background .okf-knowledge-description,
+.okf-app-background .okf-search-snippet,
+.okf-app-background .okf-doc-preview,
+.okf-app-background .okf-row-desc {
+  color: rgba(221, 232, 250, 0.72);
+}
+
+.okf-app-background .okf-knowledge-title,
+.okf-app-background .okf-search-title,
+.okf-app-background .okf-row-title,
+.okf-app-background .okf-stat-value {
+  color: #f4f8ff;
+}
+
+/* Glass card headers and footers */
+.okf-app-background .okf-group-head,
+.okf-app-background .okf-knowledge-footer,
+.okf-app-background .okf-search-footer,
+.okf-app-background .okf-doc-foot {
+  color: #edf4ff;
+  border-color: rgba(185, 211, 255, 0.14);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+/* Pills and metadata chips */
+.okf-app-background .okf-chip,
+.okf-app-background .okf-btn:not(.okf-btn-solid) {
+  color: #e8f1ff;
+  border-color: rgba(185, 211, 255, 0.2);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.okf-app-background .okf-chip:hover,
+.okf-app-background .okf-btn:not(.okf-btn-solid):hover {
+  background: rgba(100, 157, 244, 0.16);
+}
+
+.okf-app-background .okf-row {
+  border-color: rgba(185, 211, 255, 0.13);
+}
+
+.okf-app-background .okf-row:hover {
+  background: rgba(104, 157, 245, 0.09);
+}
+
+/* Make the existing OKF logo stand out on dark backgrounds */
+.okf-app-background .okf-brand img {
+  filter: drop-shadow(0 0 10px rgba(0, 220, 200, 0.2));
+}
+
+/* Smaller screens */
+@media (max-width: 640px) {
+  .okf-orbit-main {
+    width: 300px;
+    height: 300px;
+    left: -60px;
+    top: 145px;
+  }
+
+  .okf-orbit-top-right {
+    width: 380px;
+    height: 380px;
+    right: -250px;
+    top: -170px;
+  }
+
+  .okf-orbit-bottom-left {
+    width: 380px;
+    height: 380px;
+    left: -240px;
+    bottom: -230px;
+  }
+
+  .okf-orbit-bottom-right {
+    width: 300px;
+    height: 300px;
+    right: -150px;
+    bottom: -220px;
+  }
+}
+
+/* =========================================================
+   OKF READABILITY IMPROVEMENTS
+   ========================================================= */
+
+/* 1. Increase opacity of the main cards */
+.okf-app-background .okf-stat-card,
+.okf-app-background .okf-source-card,
+.okf-app-background .okf-knowledge-card,
+.okf-app-background .okf-search-card,
+.okf-app-background .okf-group {
+  background: linear-gradient(
+    135deg,
+    rgba(28, 43, 68, 0.94),
+    rgba(20, 34, 57, 0.91)
+  );
+
+  border-color: rgba(176, 202, 245, 0.24);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 12px 35px rgba(0, 0, 0, 0.18);
+
+  backdrop-filter: blur(18px) saturate(125%);
+  -webkit-backdrop-filter: blur(18px) saturate(125%);
+}
+
+/* 2. Make document card headers slightly lighter */
+.okf-app-background .okf-group-head,
+.okf-app-background .okf-knowledge-footer,
+.okf-app-background .okf-search-footer,
+.okf-app-background .okf-doc-foot {
+  background: rgba(100, 130, 175, 0.13);
+  border-color: rgba(190, 210, 245, 0.17);
+}
+
+/* 3. Improve text contrast inside cards */
+.okf-app-background .okf-stat-label,
+.okf-app-background .okf-metadata,
+.okf-app-background .okf-path,
+.okf-app-background .okf-knowledge-description,
+.okf-app-background .okf-search-snippet,
+.okf-app-background .okf-doc-preview,
+.okf-app-background .okf-row-desc {
+  color: #c2cee2;
+}
+
+.okf-app-background .okf-knowledge-title,
+.okf-app-background .okf-search-title,
+.okf-app-background .okf-row-title,
+.okf-app-background .okf-stat-value {
+  color: #f8fbff;
+}
+
+/* 4. Fix white search and filter controls */
+.okf-app-background input,
+.okf-app-background select,
+.okf-app-background textarea {
+  color: #172338;
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+/* Placeholder text must remain readable */
+.okf-app-background input::placeholder,
+.okf-app-background textarea::placeholder {
+  color: #64748b;
+  opacity: 1;
+}
+
+/* Dropdown option text */
+.okf-app-background select option {
+  color: #172338;
+  background-color: #ffffff;
+}
+
+/* 5. Keep labels and icons on light controls visible */
+.okf-app-background input,
+.okf-app-background select,
+.okf-app-background textarea {
+  color-scheme: light;
+}
+
+/* 6. Preserve the existing green action buttons */
+.okf-app-background .okf-btn-solid {
+  color: #ffffff;
+}
+
+/* 7. Slightly stronger hover state */
+.okf-app-background .okf-stat-card:hover,
+.okf-app-background .okf-source-card:hover,
+.okf-app-background .okf-knowledge-card:hover,
+.okf-app-background .okf-search-card:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(34, 54, 84, 0.97),
+    rgba(23, 41, 68, 0.95)
+  );
+
+  border-color: rgba(120, 177, 255, 0.42);
+}
+
+
+
+
+/* =========================================================
+   UPLOAD DROPZONE — TRUE LIQUID GLASS
+   ========================================================= */
+
+.okf-app-background .okf-upload-glass,
+.okf-app-background .okf-upload-glass:hover {
+  color: #edf4ff !important;
+
+  /* Reuse the original liquid-glass transparency */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.105),
+    rgba(118, 158, 221, 0.035) 50%,
+    rgba(255, 255, 255, 0.055)
+  ) !important;
+
+  border: 1px solid rgba(185, 211, 255, 0.19) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 12px 40px rgba(0, 0, 0, 0.12) !important;
+
+  backdrop-filter: blur(18px) saturate(135%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(135%) !important;
+
+  transition: none !important;
+}
+
+/* Absolutely no visual change on hover */
+.okf-app-background .okf-upload-glass:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.105),
+    rgba(118, 158, 221, 0.035) 50%,
+    rgba(255, 255, 255, 0.055)
+  ) !important;
+
+  border-color: rgba(185, 211, 255, 0.19) !important;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 12px 40px rgba(0, 0, 0, 0.12) !important;
+
+  transform: none !important;
+}
+
+/* Readable text */
+.okf-app-background .okf-upload-glass .font-display {
+  color: #f4f8ff !important;
+}
+
+.okf-app-background .okf-upload-glass .text-muted-foreground {
+  color: #c2cee2 !important;
+}
+
+.okf-app-background .okf-upload-glass .text-primary {
+  color: #86efac !important;
+}
+
+/* Remove the solid background behind the upload icon */
+.okf-app-background .okf-upload-glass .bg-accent {
+  background: transparent !important;
+  color: #dbeafe !important;
+  box-shadow: none !important;
+}
+
+/* Keep drag-over feedback */
+.okf-app-background .okf-upload-glass.bg-blue-500\/10 {
+  background: rgba(59, 130, 246, 0.10) !important;
+  border-color: rgba(96, 165, 250, 0.6) !important;
+}
+
+.okf-app-background .okf-upload-glass.bg-blue-500\/20 {
+  background: rgba(59, 130, 246, 0.20) !important;
+  border-color: rgba(96, 165, 250, 0.95) !important;
+}
+
+/* Keep successful-drop feedback */
+.okf-app-background .okf-upload-glass.bg-emerald-500\/15 {
+  background: rgba(16, 100, 75, 0.35) !important;
+  border-color: rgba(110, 231, 183, 0.7) !important;
+}

@@ -59,11 +59,15 @@ export function UploadDropzone({ onFiles }: { onFiles: (f: File[]) => void }) {
         accept(Array.from(e.dataTransfer.files));
       }}
       className={cn(
-        "group relative flex cursor-pointer flex-col items-center gap-6 rounded-3xl border-2 border-dashed bg-card px-6 py-10 text-center shadow-soft outline-none transition-all duration-300 sm:flex-row sm:justify-between sm:px-12 sm:py-14 sm:text-left focus-visible:ring-2 focus-visible:ring-ring",
-        state === "idle" && "border-border hover:border-primary/50 hover:bg-accent/30",
-        state === "armed" && "border-primary/60 bg-accent/30",
-        state === "over" && "scale-[1.01] border-primary bg-accent/60",
-        state === "success" && "border-primary bg-success-soft",
+        "okf-upload-glass group relative flex cursor-pointer flex-col items-center gap-6 rounded-3xl border px-6 py-10 text-center shadow-soft outline-none transition-all duration-300 sm:flex-row sm:justify-between sm:px-12 sm:py-14 sm:text-left focus-visible:ring-2 focus-visible:ring-ring",
+        state === "idle" &&
+          "border-white/25 hover:border-blue-400/60 hover:bg-blue-500/10",
+        state === "armed" &&
+          "border-blue-400/60 bg-blue-500/10",
+        state === "over" &&
+          "scale-[1.01] border-blue-400 bg-blue-500/20",
+        state === "success" &&
+          "border-emerald-400/60 bg-emerald-500/15",
       )}
     >
       <input
