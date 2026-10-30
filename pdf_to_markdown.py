@@ -20,6 +20,7 @@ def pdf_to_markdown(pdf_path,output_path):
         markdown.append(text)
         markdown.append("\n")
 
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text("\n".join(markdown),encoding="utf-8")
     document.close()
     print("PDF converted successfully.")

@@ -22,7 +22,7 @@ public class ConvertController {
             @RequestParam("file") MultipartFile file) {
 
         try {
-
+                System.out.println("APPLICATION WORKING DIRECTORY: "+ System.getProperty("user.dir"));
             System.out.println("Received file: " + file.getOriginalFilename());
             System.out.println("File size: " + file.getSize());
 
@@ -42,11 +42,30 @@ public class ConvertController {
                     .replaceFirst("[.][^.]+$", "")
                     .replaceAll("[^a-zA-Z0-9_-]", "_");
 
-            Path pdfPath =
-                    Path.of(baseName + ".pdf");
+            // Get the backend project's working directory
+                Path projectDirectory = Path.of("")
+                        .toAbsolutePath()
+                        .normalize();
 
-            Path markdownPath =
-                    Path.of("knowledge", baseName + ".md");
+                // Define storage directories
+                Path pdfDirectory = projectDirectory.resolve("pdfs");
+                Path knowledgeDirectory = projectDirectory.resolve("knowledge");
+
+                // Create directories if they do not exist
+                Files.createDirectories(pdfDirectory);
+                Files.createDirectories(knowledgeDirectory);
+
+                // Define absolute file paths
+                Path pdfPath = pdfDirectory.resolve(baseName + ".pdf");
+                Path markdownPath = knowledgeDirectory.resolve(baseName + ".md");
+
+                // Python conversion script
+                Path pythonScript = projectDirectory.resolve("pdf_to_markdown.py");
+
+                System.out.println("Project Directory: " + projectDirectory);
+                System.out.println("PDF Path: " + pdfPath);
+                System.out.println("Markdown Path: " + markdownPath);
+                System.out.println("Python Script: " + pythonScript);
 
             Files.write(
                     pdfPath,

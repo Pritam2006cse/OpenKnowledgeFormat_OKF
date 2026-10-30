@@ -15,31 +15,62 @@ export const SUPPORTED_EXTENSIONS = ["pdf", "docx", "txt", "md"];
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const uid = () => Math.random().toString(36).slice(2, 10);
 
-export async function uploadFile(file: File, onProgress: (p: number) => void): Promise<void> {
+export async function uploadFile(
+  file: File,
+  onProgress: (p: number) => void
+): Promise<void> {
+
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
-  for (let p = 0; p <= 100; p += 20) {
-    onProgress(p);
-    await wait(90);
+
+  if (!SUPPORTED_EXTENSIONS.includes(ext)) {
+    throw new Error(`Unsupported file type .${ext}`);
   }
-  if (!SUPPORTED_EXTENSIONS.includes(ext)) throw new Error(`Unsupported file type .${ext}`);
-  if (file.size === 0) throw new Error("File is empty");
+
+  if (file.size === 0) {
+    throw new Error("File is empty");
+  }
+
+  onProgress(100);
 }
 
-export async function convertFile(file: File, onProgress: (p: number) => void): Promise<{ markdownName: string; markdown: string }> {
-  const base = file.name.replace(/\.[^.]+$/, "");
+export async function convertFile(
+  file: File,
+  onProgress: (p: number) => void
+): Promise<{ markdownName: string; markdown: string }> {
+
   const ext = file.name.split(".").pop()?.toLowerCase();
-  for (let p = 0; p <= 100; p += 25) {
-    onProgress(p);
-    await wait(130);
+
+  if (ext !== "pdf") {
+    throw new Error("The backend conversion endpoint currently supports PDF files only.");
   }
-  let markdown: string;
-  if (ext === "md" || ext === "txt") {
-    const text = await file.text();
-    markdown = ext === "md" ? text : `# ${base.replace(/[_-]+/g, " ")}\n\n${text}`;
-  } else {
-    markdown = `# ${base.replace(/[_-]+/g, " ")}\n\n## Overview\n\nContent extracted from ${file.name}.\n\n## Key Points\n\nSection-level knowledge will be structured from headings in this document.\n`;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  onProgress(0);
+
+  const response = await fetch(`${API_BASE_URL}/api/convert`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`PDF conversion failed: ${errorText}`);
   }
-  return { markdownName: `${base}.md`, markdown };
+
+  const data = await response.json();
+
+  if (!data.markdownName || !data.markdown) {
+    throw new Error("Invalid response received from the backend.");
+  }
+
+  onProgress(100);
+
+  return {
+    markdownName: data.markdownName,
+    markdown: data.markdown,
+  };
 }
 
 
