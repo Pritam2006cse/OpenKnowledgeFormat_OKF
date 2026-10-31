@@ -1,3 +1,22 @@
+---
+type: document
+title: "Sample Story The Little Lamp"
+description: "The Little Lamp A Short Story About Courage and Kindness Chapter 1: A Stormy Evening In a small village beside a wide river lived a young girl named Mira. She lived with her grandfather in a little..."
+tags:
+tags:
+  - "little"
+  - "lamp"
+  - "lived"
+  - "story"
+  - "beside"
+  - "chapter"
+  - "courage"
+  - "evening"
+resource: "sample_story_the_little_lamp"
+timestamp: "2026-11-01"
+file_size: "1.78 KB"
+---
+
 # Sample Story The Little Lamp
 
 ## Page1

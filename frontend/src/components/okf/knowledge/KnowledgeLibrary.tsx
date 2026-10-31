@@ -1,12 +1,13 @@
-import { DocumentChat } from "./DocumentChat";
+
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { createPortal } from "react-dom";
-import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Library, Plus, Search, X } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Library, Plus, Search, X, } from "lucide-react";
 import { fetchMarkdown } from "@/lib/okf/api";
 import { useOkf } from "@/lib/okf/store";
 import type { KnowledgeItem, SourceDocument, ValidationStatus } from "@/lib/okf/types";
 import { StatusBadge, STATUS_LABEL } from "../StatusBadge";
+
 
 const selectCls =
   "h-10 rounded-xl border bg-card px-3 text-sm shadow-soft outline-none transition-colors hover:border-primary/40 focus:ring-2 focus:ring-ring cursor-pointer";
@@ -240,50 +241,10 @@ export function KnowledgeLibrary() {
             Converted from: {mdDoc.originalName} → {mdDoc.markdownName}
           </p>
 
-          {/* Document Metadata — INSERTED HERE */}
-          <div className="mt-4 space-y-4 rounded-xl border p-4">
-            <h3 className="font-semibold">Document Metadata</h3>
-
-            <Field label="Type">
-              {mdDoc.metadata.type}
-            </Field>
-
-            <Field label="Title">
-              {mdDoc.metadata.title}
-            </Field>
-
-            <Field label="Description">
-              {mdDoc.metadata.description}
-            </Field>
-
-            <Field label="Tags">
-              <div className="flex flex-wrap gap-2">
-                {mdDoc.metadata.tags.map((tag) => (
-                  <span key={tag} className="okf-pill">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </Field>
-
-            <Field label="Resource">
-              <span className="font-mono text-sm">
-                {mdDoc.metadata.resource}
-              </span>
-            </Field>
-
-            <Field label="Timestamp">
-              {mdDoc.metadata.timestamp}
-            </Field>
-          </div>
-
           {/* Existing Markdown Preview */}
           <pre className="mt-4 whitespace-pre-wrap break-words rounded-2xl border bg-muted p-5 font-mono text-[13px] leading-relaxed">
             {mdDoc.markdown}
           </pre>
-
-          {/* Existing Chatbot */}
-          <DocumentChat markdownName={mdDoc.markdownName} />
         </Drawer>
       )}
 

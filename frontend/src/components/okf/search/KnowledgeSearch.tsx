@@ -2,7 +2,7 @@ import { DocumentChat } from "../knowledge/DocumentChat";
 import { useEffect, useMemo, useState } from "react";
 import { searchKnowledge, fetchMarkdown,type BackendSearchResult } from "@/lib/okf/api";
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, ArrowRight, FileText, Search as SearchIcon, X } from "lucide-react";
+import { AlertTriangle, ArrowRight, FileText, Search as SearchIcon, X,MessageCircle } from "lucide-react";
 import { useOkf } from "@/lib/okf/store";
 import type { KnowledgeItem, SourceDocument } from "@/lib/okf/types";
 import { StatusBadge } from "../StatusBadge";
@@ -117,8 +117,12 @@ export function KnowledgeSearch() {
           autoFocus
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder={items.length ? "Search knowledge, e.g. revenue, definition, overview…" : "Upload documents to start searching"}
-          className="h-14 w-full rounded-2xl border bg-card pl-12 pr-12 text-base shadow-soft outline-none focus:ring-2 focus:ring-ring"
+          placeholder={
+            items.length
+              ? "Search knowledge, e.g. revenue, definition, overview…"
+              : "Upload documents to start searching"
+          }
+          className="!text-slate-100 caret-sky-400 placeholder:text-slate-400 h-14 w-full rounded-2xl border border-white/10 bg-slate-900/70 pl-12 pr-12 text-base shadow-soft outline-none transition-all focus:border-primary/50 focus:ring-2 focus:ring-primary/30"
         />
         {q && <button onClick={() => setQ("")} aria-label="Clear" className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 hover:bg-muted"><X className="h-4 w-4" /></button>}
       </label>
@@ -304,6 +308,31 @@ export function KnowledgeSearch() {
       )}
       {mdDoc && (
         <Drawer title={mdDoc.originalName} onClose={() => setMdDoc(null)} wide>
+           {/* OKF Assistant Banner */}
+          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+            <div className="flex items-start gap-3">
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground">
+                <MessageCircle className="h-5 w-5" />
+              </div>
+
+              <div>
+                <h3 className="font-semibold">
+                  Your OKF AI Assistant is ready!
+                </h3>
+
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Have questions about this document? Chat with
+                  OKF Assistant to understand concepts, clarify
+                  information, and explore its contents.
+                </p>
+
+                <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-primary">
+                  <ArrowRight className="h-4 w-4 rotate-90" />
+                  Scroll down to start chatting
+                </p>
+              </div>
+            </div>
+          </div>
           <p className="text-sm text-muted-foreground">Converted to <span className="font-mono">{mdDoc.markdownName}</span></p>
           <pre className="whitespace-pre-wrap break-words rounded-2xl border bg-muted p-5 font-mono text-[13px] leading-relaxed">
             {mdDoc.markdown}

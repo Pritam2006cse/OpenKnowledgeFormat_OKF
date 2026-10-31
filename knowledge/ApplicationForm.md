@@ -1,3 +1,20 @@
+---
+type: document
+title: "Applicationform"
+description: "(Enrollment ID) M209U50 Zone/Scrutiny Code 6GE PRITAM SARKAR (Full Name of the Applicant) Indian National GOUTAM SARKAR GATE Office Kharagpur 721302 gateonline@adm.iitkgp.ac.in, 03222-282091 Digita..."
+tags:
+  - "sarkar"
+  - "adm"
+  - "applicant"
+  - "applicationform"
+  - "code"
+  - "digita"
+  - "enrollment"
+  - "full"
+resource: "applicationform"
+timestamp: "2026-11-01"
+---
+
 # Applicationform
 
 ##1

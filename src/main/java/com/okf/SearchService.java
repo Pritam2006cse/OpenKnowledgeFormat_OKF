@@ -1,3 +1,4 @@
+
 package com.okf;
 
 import org.springframework.stereotype.Service;
@@ -10,7 +11,12 @@ public class SearchService {
     private volatile SearchEngine searchEngine;
     private volatile SemanticSearchEngine semanticSearchEngine;
 
-    public SearchService() throws Exception {
+    private final MarkdownMetadataService metadataService;
+
+    public SearchService(MarkdownMetadataService metadataService)
+            throws Exception {
+
+        this.metadataService = metadataService;
         reloadIndex();
     }
 
@@ -18,13 +24,25 @@ public class SearchService {
 
         System.out.println("Reloading OKF search index...");
 
+        // -----------------------------
+        // Step 1: Generate YAML metadata
+        // -----------------------------
+
+        metadataService.generateMetadataForAll("knowledge");
+
+        System.out.println("Markdown metadata generation completed.");
+
+        // -----------------------------
+        // Step 2: Load Markdown documents
+        // -----------------------------
+
         MarkdownLoader loader = new MarkdownLoader();
 
         List<Document> documents =
                 loader.loadDocuments("knowledge");
 
         // -----------------------------
-        // Level 2 index
+        // Step 3: Build keyword index
         // -----------------------------
 
         InvertedIndex invertedIndex =
@@ -39,26 +57,40 @@ public class SearchService {
                 );
 
         // -----------------------------
-        // Level 3 semantic index
+        // Step 4: Build semantic index
         // -----------------------------
 
-        SemanticIndex semanticIndex = new SemanticIndex();
+        SemanticIndex semanticIndex =
+                new SemanticIndex();
+
         semanticIndex.buildIndex(documents);
 
-        // Automatically add links to related Markdown files.
-        MarkdownLinkGenerator linkGenerator = new MarkdownLinkGenerator();
+        // -----------------------------
+        // Step 5: Generate related links
+        // -----------------------------
+
+        MarkdownLinkGenerator linkGenerator =
+                new MarkdownLinkGenerator();
+
         linkGenerator.generateLinks(
                 semanticIndex.getDocumentEmbeddings()
         );
-        semanticSearchEngine = new SemanticSearchEngine(semanticIndex);
+
+        // -----------------------------
+        // Step 6: Initialize semantic search
+        // -----------------------------
+
+        semanticSearchEngine =
+                new SemanticSearchEngine(semanticIndex);
+
+        // -----------------------------
+        // Completion logs
+        // -----------------------------
+
+        System.out.println("OKF Search Engine initialized.");
 
         System.out.println(
-                "OKF Search Engine initialized."
-        );
-
-        System.out.println(
-                "Documents loaded: "
-                + documents.size()
+                "Documents loaded: " + documents.size()
         );
 
         System.out.println(
@@ -66,13 +98,13 @@ public class SearchService {
         );
     }
 
-    // Level 2
+    // Level 2: Keyword Search
     public List<SearchResult> search(String query) {
 
         return searchEngine.search(query);
     }
 
-    // Level 3
+    // Level 3: Semantic Search
     public List<SearchResult> semanticSearch(
             String query) throws Exception {
 

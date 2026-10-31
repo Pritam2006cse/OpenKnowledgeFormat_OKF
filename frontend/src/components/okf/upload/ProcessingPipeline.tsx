@@ -35,33 +35,60 @@ export function ProcessingPipeline({ runs, queue }: { runs: { fileId: string; st
   );
 }
 
+
 export function ProcessingResult({ result }: { result: { files: string[]; items: number; terms: number } }) {
   return (
-    <div className="animate-fade-up rounded-3xl border border-primary/30 bg-card p-6 shadow-soft sm:p-8">
+    <div className="animate-fade-up w-full rounded-3xl border border-white/10 bg-slate-900/75 p-5 shadow-soft backdrop-blur-xl sm:p-6">
+
+      {/* Success heading */}
       <div className="flex items-center gap-3">
-        <div className="grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground animate-pop">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-emerald-700 text-white animate-pop">
           <Check className="h-5 w-5" />
         </div>
-        <h2 className="font-display text-xl font-semibold">Knowledge processed successfully</h2>
+
+        <h2 className="font-display text-lg font-semibold text-white sm:text-xl">
+          Knowledge processed successfully
+        </h2>
       </div>
-      <p className="mt-3 truncate text-sm text-muted-foreground">{result.files.join(", ")}</p>
-      <dl className="mt-6 grid grid-cols-3 gap-3">
+
+      <p className="mt-2 truncate text-sm text-slate-300">
+        {result.files.join(", ")}
+      </p>
+
+      {/* Compact statistics */}
+      <dl className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
         {[
           ["Knowledge items", result.items],
           ["Sources", result.files.length],
           ["Terms indexed", result.terms],
         ].map(([k, v]) => (
-          <div key={k} className="rounded-xl bg-muted p-3">
-            <dd className="font-display text-2xl font-semibold">{v}</dd>
-            <dt className="text-xs text-muted-foreground">{k}</dt>
+          <div
+            key={k}
+            className="min-w-0 rounded-xl border border-white/10 bg-slate-800/80 px-4 py-3"
+          >
+            <dd className="font-display text-2xl font-semibold leading-tight text-white">
+              {v}
+            </dd>
+            <dt className="mt-1 text-sm text-slate-300">
+              {k}
+            </dt>
           </div>
         ))}
       </dl>
-      <div className="mt-6 flex flex-wrap gap-3">
-        <Link to="/knowledge" className="lift inline-flex items-center rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground">
+
+      {/* Actions */}
+      <div className="mt-5 flex flex-wrap gap-3">
+        <Link
+          to="/knowledge"
+          className="lift inline-flex items-center rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
+        >
           View Knowledge →
         </Link>
-        <button onClick={() => okf.reset()} className="lift inline-flex items-center rounded-xl border bg-card px-5 py-2.5 text-sm font-semibold">
+
+        <button
+          onClick={() => okf.reset()}
+          className="lift inline-flex items-center rounded-xl border border-white/15 bg-slate-800 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-slate-700"
+        >
           Upload More
         </button>
       </div>

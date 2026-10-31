@@ -1,3 +1,20 @@
+---
+type: document
+title: "Okf Sample Knowledge"
+description: "Computer Networks and TCP Introduction Computer networks allow devices to communicate and exchange data. A network may contain computers, routers, switches, servers, and other devices. TCP Transmis..."
+tags:
+  - "computer"
+  - "devices"
+  - "networks"
+  - "tcp"
+  - "allow"
+  - "communicate"
+  - "computers"
+  - "contain"
+resource: "sample"
+timestamp: "2026-11-01"
+---
+
 # Okf Sample Knowledge
 
 ##1

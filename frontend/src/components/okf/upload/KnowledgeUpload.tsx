@@ -20,7 +20,7 @@ export function KnowledgeUpload() {
           <p className="mt-2 text-muted-foreground">Add documents to transform them into structured, searchable knowledge.</p>
         </div>
         {queue.length > 0 && (
-          <span className="rounded-full border bg-card px-3 py-1 text-sm font-medium shadow-soft">
+          <span className="rounded-full border border-white/10 bg-slate-800/70 px-3 py-1 text-sm font-medium text-slate-100 shadow-soft">
             {queue.length} {queue.length === 1 ? "file" : "files"} · {ready} ready
           </span>
         )}
