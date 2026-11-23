@@ -12,11 +12,14 @@ C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\EmbeddingTest.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\InvertedIndex.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\InvertedIndexV3.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\KnowledgeGraphBuilder.java
+C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\LibraryController.java
+C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\LibraryDocumentDTO.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\Main.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\MarkdownContextService.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\MarkdownLinkGenerator.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\MarkdownLoader.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\MarkdownMetadataService.java
+C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\MetadataDocumentMatcher.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\OKFApplication.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\OllamaChatService.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\OllamaEmbeddingService.java

@@ -34,6 +34,7 @@ Computer networks can be classified as LAN, MAN and WAN.
 - [Okf Sample Knowledge](sample.md)
 - [Okf Sample Knowledge](OKF_sample_knowledge.md)
 - [Laptops](laptop.md)
+- [Okf Test Knowledge Network Security](OKF_Test_Knowledge_Network_Security.md)
 - [Smartphones](smartphone.md)
 
 <!-- OKF_AUTO_LINKS_END -->

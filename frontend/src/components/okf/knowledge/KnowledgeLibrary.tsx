@@ -1,9 +1,9 @@
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { createPortal } from "react-dom";
 import { AlertTriangle, ArrowRight, CheckCircle2, FileText, Library, Plus, Search, X, } from "lucide-react";
-import { fetchMarkdown } from "@/lib/okf/api";
+import { fetchMarkdown,fetchLibrary,type LibraryDocument,} from "@/lib/okf/api";
 import { useOkf } from "@/lib/okf/store";
 import type { KnowledgeItem, SourceDocument, ValidationStatus } from "@/lib/okf/types";
 import { StatusBadge, STATUS_LABEL } from "../StatusBadge";
@@ -21,7 +21,33 @@ export function KnowledgeLibrary() {
   const [source, setSource] = useState("all");
   const [open, setOpen] = useState<KnowledgeItem | null>(null);
   const [mdDoc, setMdDoc] = useState<SourceDocument | null>(null);
-
+  const [libraryDocuments, setLibraryDocuments] = useState<LibraryDocument[]>([]);
+  const [libraryLoading, setLibraryLoading] = useState(true);
+  const [libraryError, setLibraryError] = useState("");
+  const [libraryPage, setLibraryPage] = useState(1); 
+  const LIBRARY_PAGE_SIZE = 4;
+    useEffect(() => {
+    async function loadLibrary() {
+      try {
+        setLibraryLoading(true);
+        setLibraryError("");
+        const data = await fetchLibrary();
+        setLibraryDocuments(data);
+      } catch (error) {
+        setLibraryError(
+          error instanceof Error
+            ? error.message
+            : "Failed to load library.",
+        );
+      } finally {
+        setLibraryLoading(false);
+      }
+    }
+    loadLibrary();
+  }, []);
+  const libraryTotalPages = Math.ceil(libraryDocuments.length / LIBRARY_PAGE_SIZE);
+  const libraryStartIndex = (libraryPage - 1) * LIBRARY_PAGE_SIZE;
+  const visibleLibraryDocuments = libraryDocuments.slice(libraryStartIndex,libraryStartIndex + LIBRARY_PAGE_SIZE);
   const types = useMemo(() => Array.from(new Set(items.map((i) => i.type))), [items]);
   const docById = useMemo(() => Object.fromEntries(documents.map((d) => [d.id, d])), [documents]);
   const filtered = items.filter(
@@ -70,10 +96,10 @@ export function KnowledgeLibrary() {
       {/* STATS */}
       <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
-          { k: "Documents", v: documents.length, Icon: FileText },
+          { k: "Documents", v: libraryDocuments.length, Icon: FileText },
           { k: "Knowledge Items", v: items.length, Icon: Library },
-          { k: "Valid", v: count("valid"), Icon: CheckCircle2 },
-          { k: "Needs Review", v: count("review"), Icon: AlertTriangle },
+          //{ k: "Valid", v: count("valid"), Icon: CheckCircle2 },
+          //{ k: "Needs Review", v: count("review"), Icon: AlertTriangle },
         ].map(({ k, v, Icon }) => (
           <div key={k} className="okf-stat-card">
             <div className="okf-icon-chip"><Icon className="h-5 w-5" /></div>
@@ -84,6 +110,100 @@ export function KnowledgeLibrary() {
           </div>
         ))}
       </dl>
+      
+      {/* DOCUMENT LIBRARY */}
+        <section className="space-y-4">
+          <div>
+            <h2 className="font-display text-2xl font-semibold">
+              My Library
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Documents currently available in your OKF knowledge library.
+            </p>
+          </div>
+          {libraryLoading && (
+            <div className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">
+              Loading library...
+            </div>
+          )}
+          {libraryError && (
+            <div className="rounded-2xl border border-destructive/30 bg-card p-4 text-sm text-destructive">
+              {libraryError}
+            </div>
+          )}
+          {!libraryLoading &&
+            !libraryError &&
+            libraryDocuments.length === 0 && (
+              <div className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">
+                No documents found in your library.
+              </div>
+            )}
+          {!libraryLoading &&
+            !libraryError &&
+            libraryDocuments.length > 0 && (
+              <div className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  {visibleLibraryDocuments.map((document) => (
+                    <div
+                      key={document.fileName}
+                      className="rounded-2xl border bg-card p-5 shadow-soft transition-shadow hover:shadow-lift"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent text-accent-foreground">
+                          <FileText className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0">
+                          <h3 className="font-semibold">
+                            {document.title}
+                          </h3>
+                          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                            {document.description}
+                          </p>
+                          <p className="mt-4 break-all font-mono text-xs text-muted-foreground">
+                            {document.fileName}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {libraryTotalPages > 1 && (
+                  <div className="flex items-center justify-between pt-2">
+                    <button
+                      onClick={() =>
+                        setLibraryPage((page) =>
+                          Math.max(page - 1, 1)
+                        )
+                      }
+                      disabled={libraryPage === 1}
+                      className="rounded-xl border bg-card px-4 py-2 text-sm font-medium text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Previous
+                    </button>
+
+                    <span className="text-sm text-muted-foreground">
+                      Page {libraryPage} of {libraryTotalPages}
+                    </span>
+
+                    <button
+                      onClick={() =>
+                        setLibraryPage((page) =>
+                          Math.min(
+                            page + 1,
+                            libraryTotalPages
+                          )
+                        )
+                      }
+                      disabled={libraryPage === libraryTotalPages}
+                      className="rounded-xl border bg-card px-4 py-2 text-sm font-medium text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+        </section>
 
       {/* KNOWLEDGE */}
       <section className="space-y-4">

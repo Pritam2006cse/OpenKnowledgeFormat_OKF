@@ -1,8 +1,6 @@
 
 package com.okf;
-
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -10,26 +8,22 @@ public class SearchService {
 
     private volatile SearchEngine searchEngine;
     private volatile SemanticSearchEngine semanticSearchEngine;
-
     private final MarkdownMetadataService metadataService;
-
-    public SearchService(MarkdownMetadataService metadataService)
-            throws Exception {
-
+    private final MetadataDocumentMatcher metadataDocumentMatcher;
+    public SearchService(MarkdownMetadataService metadataService, MetadataDocumentMatcher metadataDocumentMatcher)throws Exception {
         this.metadataService = metadataService;
+        this.metadataDocumentMatcher = metadataDocumentMatcher;
         reloadIndex();
     }
 
-    public synchronized void reloadIndex() throws Exception {
-
+    public synchronized void reloadIndex() throws Exception 
+    {
         System.out.println("Reloading OKF search index...");
-
         // -----------------------------
         // Step 1: Generate YAML metadata
         // -----------------------------
 
         metadataService.generateMetadataForAll("knowledge");
-
         System.out.println("Markdown metadata generation completed.");
 
         // -----------------------------
@@ -37,77 +31,61 @@ public class SearchService {
         // -----------------------------
 
         MarkdownLoader loader = new MarkdownLoader();
-
-        List<Document> documents =
-                loader.loadDocuments("knowledge");
+        List<Document> documents = loader.loadDocuments("knowledge");
 
         // -----------------------------
         // Step 3: Build keyword index
         // -----------------------------
 
-        InvertedIndex invertedIndex =
-                new InvertedIndex();
-
+        InvertedIndex invertedIndex = new InvertedIndex();
         invertedIndex.buildIndex(documents);
-
-        searchEngine =
-                new SearchEngine(
-                        documents,
-                        invertedIndex
-                );
+        searchEngine = new SearchEngine(documents,invertedIndex);
 
         // -----------------------------
         // Step 4: Build semantic index
         // -----------------------------
 
-        SemanticIndex semanticIndex =
-                new SemanticIndex();
-
+        SemanticIndex semanticIndex = new SemanticIndex();
         semanticIndex.buildIndex(documents);
 
         // -----------------------------
         // Step 5: Generate related links
         // -----------------------------
 
-        MarkdownLinkGenerator linkGenerator =
-                new MarkdownLinkGenerator();
-
-        linkGenerator.generateLinks(
-                semanticIndex.getDocumentEmbeddings()
-        );
+        MarkdownLinkGenerator linkGenerator = new MarkdownLinkGenerator();
+        linkGenerator.generateLinks(semanticIndex.getDocumentEmbeddings());
 
         // -----------------------------
         // Step 6: Initialize semantic search
         // -----------------------------
 
-        semanticSearchEngine =
-                new SemanticSearchEngine(semanticIndex);
+        semanticSearchEngine = new SemanticSearchEngine(semanticIndex);
 
         // -----------------------------
         // Completion logs
         // -----------------------------
 
         System.out.println("OKF Search Engine initialized.");
-
-        System.out.println(
-                "Documents loaded: " + documents.size()
-        );
-
-        System.out.println(
-                "Search indexes reloaded successfully."
-        );
+        System.out.println("Documents loaded: " + documents.size());
+        System.out.println("Search indexes reloaded successfully.");
     }
 
     // Level 2: Keyword Search
-    public List<SearchResult> search(String query) {
-
+    public List<SearchResult> search(String query) 
+    {
         return searchEngine.search(query);
     }
 
     // Level 3: Semantic Search
-    public List<SearchResult> semanticSearch(
-            String query) throws Exception {
-
+    public List<SearchResult> semanticSearch(String query) throws Exception 
+    {
         return semanticSearchEngine.search(query);
+    }
+
+    public String findBestOtherDocumentFromMetadata(String query,String selectedDocument)throws Exception {
+        return metadataDocumentMatcher.findBestDocument(
+                query,
+                selectedDocument
+        );
     }
 }

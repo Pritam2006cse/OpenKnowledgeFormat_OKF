@@ -8,6 +8,7 @@ public class ChatRequestDTO {
 
     private String markdownName;
     private String message;
+    private String approvedDocument;
     private List<ChatMessageDTO> history = new ArrayList<>();
 
     public ChatRequestDTO() {
@@ -27,6 +28,14 @@ public class ChatRequestDTO {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getApprovedDocument() {
+        return approvedDocument;
+    }
+
+    public void setApprovedDocument(String approvedDocument) {
+        this.approvedDocument = approvedDocument;
     }
 
     public List<ChatMessageDTO> getHistory() {

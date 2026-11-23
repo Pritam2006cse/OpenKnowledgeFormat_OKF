@@ -244,6 +244,26 @@ export async function fetchMarkdown(
   return data.markdown;
 }
 
+export interface LibraryDocument {
+  title: string;
+  description: string;
+  fileName: string;
+}
+
+export async function fetchLibrary(): Promise<LibraryDocument[]> {
+  const response = await fetch(
+    `${API_BASE_URL}/api/library`
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load library: ${response.status} ${response.statusText}`
+    );
+  }
+
+  return response.json();
+}
+
 
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -253,12 +273,15 @@ export interface ChatMessage {
 export interface DocumentChatResponse {
   markdownName: string;
   answer: string;
+  status: "ANSWER" | "CROSS_DOCUMENT_PERMISSION" | "NO_EVIDENCE";
+  suggestedDocument?: string;
 }
 
 export async function chatWithDocument(
   markdownName: string,
   message: string,
   history: ChatMessage[],
+  approvedDocument?: string,
 ): Promise<DocumentChatResponse> {
   const response = await fetch(`${API_BASE_URL}/api/chat`, {
     method: "POST",
@@ -269,6 +292,7 @@ export async function chatWithDocument(
       markdownName,
       message,
       history,
+      approvedDocument,
     }),
   });
 
@@ -277,11 +301,12 @@ export async function chatWithDocument(
 
     try {
       const data = await response.json();
+
       if (data.message) {
         errorMessage = data.message;
       }
     } catch {
-      // Keep the fallback error message.
+      // Keep fallback error message.
     }
 
     throw new Error(errorMessage);
