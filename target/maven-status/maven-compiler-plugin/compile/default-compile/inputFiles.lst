@@ -5,6 +5,10 @@ C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\ChatController.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\ChatMessageDTO.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\ChatRequestDTO.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\ChatResponseDTO.java
+C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\ConceptDecompositionService.java
+C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\ConceptMarkdownWriter.java
+C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\ConceptMergeService.java
+C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\ConceptSimilarityService.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\ConvertController.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\Document.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\DocumentEmbedding.java
@@ -15,6 +19,7 @@ C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\KnowledgeGraphBuilder.j
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\LibraryController.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\LibraryDocumentDTO.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\Main.java
+C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\MarkdownContentLoader.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\MarkdownContextService.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\MarkdownLinkGenerator.java
 C:\Users\KIIT\OneDrive\Desktop\OKF\src\main\java\com\okf\MarkdownLoader.java

@@ -47,10 +47,3 @@ keep lights ready for anyone who might need help.
 Moral of the Story
 A small act of kindness can bring hope to others, and true courage is doing the right thing even
 when you feel afraid.
-
-<!-- OKF_AUTO_LINKS_START -->
-
-## Related Documents
-
-
-<!-- OKF_AUTO_LINKS_END -->

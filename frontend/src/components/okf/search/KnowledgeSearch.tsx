@@ -1,12 +1,24 @@
 import { DocumentChat } from "../knowledge/DocumentChat";
 import { useEffect, useMemo, useState } from "react";
-import { searchKnowledge, fetchMarkdown,type BackendSearchResult } from "@/lib/okf/api";
+import {
+  searchKnowledge,
+  fetchMarkdown,
+  fetchLibrary,
+  type BackendSearchResult,
+  type LibraryDocument,
+} from "@/lib/okf/api";
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, ArrowRight, FileText, Search as SearchIcon, X,MessageCircle } from "lucide-react";
 import { useOkf } from "@/lib/okf/store";
-import type { KnowledgeItem, SourceDocument } from "@/lib/okf/types";
+import type { KnowledgeItem } from "@/lib/okf/types";
 import { StatusBadge } from "../StatusBadge";
 import { Drawer, Field } from "../knowledge/KnowledgeLibrary";
+
+interface MarkdownPreview {
+  originalName: string;
+  markdownName: string;
+  markdown: string;
+}
 
 /*// Client-side inverted index mirroring the Java InvertedIndex (TF-IDF ranking).
 // Swap for GET /search when the backend is connected.
@@ -41,16 +53,61 @@ export function KnowledgeSearch() {
   const [results, setResults] = useState<BackendSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
+  const [libraryDocuments, setLibraryDocuments] = useState<LibraryDocument[]>([]);
+  const [libraryLoading, setLibraryLoading] = useState(true);
+  const [libraryError, setLibraryError] = useState("");
+  const [previewError, setPreviewError] = useState("");
   const [type, setType] = useState("all");
   const [status, setStatus] = useState("all");
   const [source, setSource] = useState("all");
   const [open, setOpen] = useState<KnowledgeItem | null>(null);
-  const [mdDoc, setMdDoc] = useState<SourceDocument | null>(null);
+  const [selectedResult, setSelectedResult] = useState<BackendSearchResult | null>(null);
+  const [mdDoc, setMdDoc] = useState<MarkdownPreview | null>(null);
 
   const docById = useMemo(() => Object.fromEntries(documents.map((d) => [d.id, d])), [documents]);
+  const libraryByFileName = useMemo(
+    () => new Map(libraryDocuments.map((document) => [document.fileName, document])),
+    [libraryDocuments],
+  );
   const types = useMemo(() => Array.from(new Set(items.map((i) => i.type))), [items]);
   const failed = documents.filter((d) => d.status === "invalid");
   const reviews = items.filter((i) => i.status === "review");
+
+  useEffect(() => {
+    let active = true;
+
+    fetchLibrary()
+      .then((data) => {
+        if (active) setLibraryDocuments(data);
+      })
+      .catch((error) => {
+        if (active) {
+          setLibraryError(
+            error instanceof Error ? error.message : "Failed to load the knowledge library.",
+          );
+        }
+      })
+      .finally(() => {
+        if (active) setLibraryLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function showMarkdown(markdownName: string, originalName: string) {
+    try {
+      setPreviewError("");
+      const markdown = await fetchMarkdown(markdownName);
+      setMdDoc({ originalName, markdownName, markdown });
+    } catch (error) {
+      setPreviewError(
+        error instanceof Error ? error.message : "Failed to load Markdown.",
+      );
+    }
+  }
+
   useEffect(() => {
   const query = q.trim();
 
@@ -118,7 +175,7 @@ export function KnowledgeSearch() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={
-            items.length
+            items.length || libraryDocuments.length
               ? "Search knowledge, e.g. revenue, definition, overview…"
               : "Upload documents to start searching"
           }
@@ -144,10 +201,16 @@ export function KnowledgeSearch() {
         </section>
       )}
 
-      {!items.length ? (
+      {!items.length && !libraryDocuments.length ? (
         <div className="grid place-items-center rounded-3xl border bg-card px-6 py-16 text-center shadow-soft">
-          <h2 className="font-display text-xl font-semibold">Nothing to search yet</h2>
-          <p className="mt-1 text-muted-foreground">Upload and process documents to build the index.</p>
+          <h2 className="font-display text-xl font-semibold">
+            {libraryLoading ? "Loading knowledge..." : "Nothing to search yet"}
+          </h2>
+          <p className="mt-1 text-muted-foreground">
+            {libraryLoading
+              ? "Loading the knowledge library."
+              : libraryError || "Upload and process documents to build the index."}
+          </p>
           <Link to="/" className="lift mt-6 inline-flex rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground">Upload Knowledge</Link>
         </div>
       ) : (
@@ -164,14 +227,16 @@ export function KnowledgeSearch() {
             </select>
             <select value={source} onChange={(e) => setSource(e.target.value)} className={selectCls} aria-label="Source">
               <option value="all">All Sources</option>
-              {documents.filter((d) => d.status !== "processing").map((d) => <option key={d.id} value={d.id}>{d.originalName}</option>)}
+              {documents.length
+                ? documents.filter((d) => d.status !== "processing").map((d) => <option key={d.id} value={d.id}>{d.originalName}</option>)
+                : libraryDocuments.map((document) => <option key={document.fileName} value={document.fileName}>{document.title}</option>)}
             </select>
           </div>
 
           {!q ? (
 
   <p className="rounded-2xl border bg-card p-8 text-center text-sm text-muted-foreground">
-    Type a keyword to search {items.length} knowledge items.
+    Type a keyword to search {libraryDocuments.length || items.length} knowledge documents.
   </p>
 
 ) : searching ? (
@@ -202,6 +267,8 @@ export function KnowledgeSearch() {
                       doc.markdownName === result.id ||
                       doc.originalName === result.id
                   );
+                  const libraryDocument = libraryByFileName.get(result.id);
+                  const markdownName = d?.markdownName ?? libraryDocument?.fileName ?? result.id;
 
                   const item = d
                     ? items.find((i) => i.documentId === d.id)
@@ -226,9 +293,9 @@ export function KnowledgeSearch() {
                       <div className="okf-search-footer">
                         <p className="okf-path">
                           <FileText className="h-3 w-3 shrink-0" />
-                          <span>{d?.originalName ?? result.id}{item?.sourcePage ? ` (p. ${item.sourcePage})` : ""}</span>
+                          <span>{d?.originalName ?? libraryDocument?.title ?? result.id}{item?.sourcePage ? ` (p. ${item.sourcePage})` : ""}</span>
                           <ArrowRight className="h-3 w-3 shrink-0" />
-                          <span>{d?.markdownName ?? result.id}</span>
+                          <span>{markdownName}</span>
                         </p>
 
                         <div className="okf-meter">
@@ -242,30 +309,28 @@ export function KnowledgeSearch() {
                           {item?.status ? <StatusBadge status={item.status} /> : <span />}
 
                           <div className="flex gap-2">
-                            {item && (
-                              <button
-                                onClick={() => setOpen(item)}
-                                className="okf-btn"
-                              >
-                                View Knowledge
-                              </button>
-                            )}
+                            <button
+                              onClick={() =>
+                                item
+                                  ? setOpen(item)
+                                  : setSelectedResult(result)
+                              }
+                              className="okf-btn"
+                            >
+                              View Knowledge
+                            </button>
 
-                            {d && (
-                              <button
-                                onClick={async () => {
-                                  try {
-                                    const markdown = await fetchMarkdown(d.markdownName);
-                                    setMdDoc({ ...d, markdown });
-                                  } catch (error) {
-                                    console.error("Failed to load Markdown:", error);
-                                  }
-                                }}
-                                className="okf-btn okf-btn-solid"
-                              >
-                                Preview Source
-                              </button>
-                            )}
+                            <button
+                              onClick={() =>
+                                showMarkdown(
+                                  markdownName,
+                                  d?.originalName ?? libraryDocument?.title ?? result.title,
+                                )
+                              }
+                              className="okf-btn okf-btn-solid"
+                            >
+                              Preview Source
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -306,6 +371,24 @@ export function KnowledgeSearch() {
           </button>
         </Drawer>
       )}
+      {selectedResult && (
+        <Drawer
+          title={selectedResult.title}
+          onClose={() => setSelectedResult(null)}
+        >
+          <Field label="Description">{selectedResult.snippet}</Field>
+          <Field label="Markdown file">{selectedResult.id}</Field>
+          <button
+            onClick={() => {
+              setSelectedResult(null);
+              void showMarkdown(selectedResult.id, selectedResult.title);
+            }}
+            className="lift inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
+          >
+            <FileText className="h-4 w-4" /> View Markdown
+          </button>
+        </Drawer>
+      )}
       {mdDoc && (
         <Drawer title={mdDoc.originalName} onClose={() => setMdDoc(null)} wide>
            {/* OKF Assistant Banner */}
@@ -339,6 +422,14 @@ export function KnowledgeSearch() {
           </pre>
           <DocumentChat markdownName={mdDoc.markdownName} />
         </Drawer>
+      )}
+      {previewError && (
+        <p
+          role="alert"
+          className="rounded-xl border border-destructive/30 bg-card p-3 text-sm text-destructive"
+        >
+          {previewError}
+        </p>
       )}
     </div>
   );

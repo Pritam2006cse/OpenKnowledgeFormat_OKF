@@ -41,7 +41,7 @@ public class SearchController {
                 SearchResult bestDocument = results.get(0);
                 // Step 2: Retrieve a passage from that document.
                 PassageRetriever passageRetriever = new PassageRetriever();
-                String passage = passageRetriever.findBestPassage(bestDocument.getDocument().getContent(),q);
+                String passage = passageRetriever.findBestPassage(bestDocument.getContent(),q);
                 // Step 3: Return the passage and its source.
                 return List.of(new SearchResultDTO(
                                 bestDocument.getDocument().getId(),

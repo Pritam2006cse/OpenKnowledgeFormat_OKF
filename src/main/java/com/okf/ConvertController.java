@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,9 +14,12 @@ import java.nio.file.Path;
 @CrossOrigin(origins = "http://localhost:8081")
 public class ConvertController {
          private final SearchService searchService;
-
-        public ConvertController(SearchService searchService) {
+        private final ConceptDecompositionService conceptDecompositionService;
+        private final ConceptMergeService conceptMergeService;
+        public ConvertController(SearchService searchService, ConceptDecompositionService conceptDecompositionService, ConceptMergeService conceptMergeService) {
                 this.searchService = searchService;
+                this.conceptMergeService = conceptMergeService;
+                this.conceptDecompositionService = conceptDecompositionService;
         }
     @PostMapping("/convert")
     public ResponseEntity<?> convertPdf(
@@ -117,21 +121,78 @@ public class ConvertController {
             }
 
             String markdown =
-        Files.readString(
-                markdownPath,
-                StandardCharsets.UTF_8
+                Files.readString(
+                        markdownPath,
+                        StandardCharsets.UTF_8
+                );
+
+        System.out.println(
+                "\n========== CONCEPT DECOMPOSITION =========="
         );
 
-// Reload the OKF search index so the new
-// Markdown document becomes searchable.
-searchService.reloadIndex();
+        System.out.println(
+                "Sending Markdown to Ollama..."
+        );
 
-return ResponseEntity.ok(
-        new ConvertResponse(
-                markdownPath.getFileName().toString(),
-                markdown
-        )
-);
+        var concepts =
+                conceptDecompositionService.decompose(
+                        markdown
+                );
+
+        System.out.println(
+                "Ollama identified "
+                        + concepts.size()
+                        + " concept(s)."
+        );
+
+        for (var concept : concepts) {
+        System.out.println(
+                "Creating concept: "
+                        + concept.title()
+                        + " -> "
+                        + concept.resource()
+        );
+        conceptMergeService.saveOrMerge(
+                concept
+        );
+        }
+
+        System.out.println(
+                "========== CONCEPT DECOMPOSITION COMPLETE ==========\n"
+        );
+
+        // The original Markdown produced by the PDF converter
+        // was only temporary input for concept decomposition.
+        // Do not keep it as a knowledge document.
+        try {
+
+        Files.deleteIfExists(
+                markdownPath
+        );
+
+        System.out.println(
+                "Temporary raw Markdown deleted: "
+                        + markdownPath.getFileName()
+        );
+
+        } catch (IOException e) {
+
+        System.out.println(
+                "Warning: could not delete temporary Markdown: "
+                        + e.getMessage()
+        );
+        }
+
+        // Reload the OKF search index so only the newly
+        // generated concept Markdown files are indexed.
+        searchService.reloadIndex();
+
+        return ResponseEntity.ok(
+                new ConvertResponse(
+                        "Concept decomposition completed",
+                        markdown
+                )
+        );
 
         } catch (Exception e) {
 

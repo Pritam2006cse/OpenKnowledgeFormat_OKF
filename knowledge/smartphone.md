@@ -29,9 +29,8 @@ manufacture smartphones.
 
 <!-- OKF_AUTO_LINKS_START -->
 
-## Related Documents
+## Related Knowledge
 
 - [Laptops](laptop.md)
-- [Computer Networks](computer_networks.md)
 
 <!-- OKF_AUTO_LINKS_END -->

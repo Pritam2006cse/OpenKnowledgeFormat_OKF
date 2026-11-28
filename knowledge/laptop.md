@@ -28,7 +28,7 @@ business and entertainment.
 
 <!-- OKF_AUTO_LINKS_START -->
 
-## Related Documents
+## Related Knowledge
 
 - [Smartphones](smartphone.md)
 - [Computer Networks](computer_networks.md)

@@ -39,10 +39,12 @@ acknowledgement, IP address, routing, DNS, domain name, and network.
 
 <!-- OKF_AUTO_LINKS_START -->
 
-## Related Documents
+## Related Knowledge
 
 - [Okf Sample Knowledge](OKF_sample_knowledge.md)
 - [Computer Networks](computer_networks.md)
-- [Okf Test Knowledge Network Security](OKF_Test_Knowledge_Network_Security.md)
+- [Network Security](network_security.md)
+- [Key Concepts](key_concepts.md)
+- [Firewall](firewall.md)
 
 <!-- OKF_AUTO_LINKS_END -->

@@ -29,7 +29,9 @@ robotics and recommendation systems.
 
 <!-- OKF_AUTO_LINKS_START -->
 
-## Related Documents
+## Related Knowledge
 
+- [Robotics](robotics.md)
+- [Computer Vision](computer_vision.md)
 
 <!-- OKF_AUTO_LINKS_END -->
